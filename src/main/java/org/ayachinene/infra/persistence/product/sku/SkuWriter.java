@@ -35,25 +35,44 @@ public class SkuWriter {
     ) {
         if (skus.isEmpty()) return;
 
-        var identifiedSkus = skus.stream()
-                .map(sku -> new IdentifiedSku(UUID7s.generate(), sku))
-                .toList();
-        var selectionPos = toSelectionPos(identifiedSkus, createdAt);
+        var skuItems = assignIds(skus);
+        var selectionPos = toSelectionPos(skuItems, createdAt);
 
-        skuMapper.insertBatch(toSkuPos(productId, identifiedSkus, createdAt));
+        skuMapper.insertBatch(toSkuPos(productId, skuItems, createdAt));
         if (!selectionPos.isEmpty()) {
             selectionMapper.insertBatch(selectionPos);
         }
     }
 
+    private List<SkuWithId> assignIds(List<Sku> skus) {
+        return skus.stream()
+                .map(sku -> new SkuWithId(UUID7s.generate(), sku))
+                .toList();
+    }
+
+    private List<SkuSpecificationSelectionPO> toSelectionPos(
+        List<SkuWithId> skus,
+        LocalDateTime createdAt
+    ) {
+        return skus.stream()
+            .flatMap(item -> item.sku().specificationSelections().stream()
+                .map(selection -> persistenceConverter.toSelectionPo(selection)
+                    .setId(UUID7s.generate())
+                    .setSkuId(item.skuId())
+                    .setCreatedAt(createdAt)
+                )
+            )
+            .toList();
+    }
+
     private List<SkuPO> toSkuPos(
             UUID7 productId,
-            List<IdentifiedSku> skus,
+            List<SkuWithId> skus,
             LocalDateTime createdAt
     ) {
         return skus.stream()
-                .map(identified -> persistenceConverter.toSkuPo(identified.sku())
-                        .setId(identified.id())
+                .map(item -> persistenceConverter.toSkuPo(item.sku())
+                        .setId(item.skuId())
                         .setProductId(productId)
                         .setVersion(INITIAL_VERSION)
                         .setCreatedAt(createdAt)
@@ -62,21 +81,6 @@ public class SkuWriter {
                 .toList();
     }
 
-    private List<SkuSpecificationSelectionPO> toSelectionPos(
-            List<IdentifiedSku> skus,
-            LocalDateTime createdAt
-    ) {
-        return skus.stream()
-                .flatMap(identified -> identified.sku().specificationSelections().stream()
-                        .map(selection -> persistenceConverter.toSelectionPo(selection)
-                                .setId(UUID7s.generate())
-                                .setSkuId(identified.id())
-                                .setCreatedAt(createdAt)
-                        )
-                )
-                .toList();
-    }
-
-    private record IdentifiedSku(UUID7 id, Sku sku) {
+    private record SkuWithId(UUID7 skuId, Sku sku) {
     }
 }

@@ -32,6 +32,30 @@ class SkuSpecificationValidatorTest {
     }
 
     @Test
+    void acceptsOneDefaultSkuForProductWithoutSpecifications() {
+        assertDoesNotThrow(() -> SkuSpecificationValidator.validate(
+                List.of(),
+                List.of(sku())
+        ));
+    }
+
+    @Test
+    void rejectsMultipleSkusForProductWithoutSpecifications() {
+        assertThrows(ValidationException.class, () -> SkuSpecificationValidator.validate(
+                List.of(),
+                List.of(sku(), sku())
+        ));
+    }
+
+    @Test
+    void rejectsSelectionsForProductWithoutSpecifications() {
+        assertThrows(ValidationException.class, () -> SkuSpecificationValidator.validate(
+                List.of(),
+                List.of(sku(new SelectionInput("颜色", "黑色")))
+        ));
+    }
+
+    @Test
     void rejectsAnIncompleteSkuConfiguration() {
         assertThrows(ValidationException.class, () -> SkuSpecificationValidator.validate(
                 SPECIFICATIONS,

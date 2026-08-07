@@ -28,6 +28,7 @@ public final class SkuValidator {
                 .map(SkuValidator::validate)
                 .toList();
 
+        Validates.require(!skus.isEmpty(), "skus must not be empty");
         Validates.require(
                 Lists.isUnique(skus.stream()
                         .map(SkuInput::merchantSkuCode)

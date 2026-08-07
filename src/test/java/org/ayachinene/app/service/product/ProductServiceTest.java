@@ -49,7 +49,12 @@ class ProductServiceTest {
                         List.of()
                 ),
                 List.of(),
-                List.of()
+                List.of(new SkuInput(
+                        null,
+                        BigDecimal.ONE,
+                        null,
+                        List.of()
+                ))
         ));
 
         var creationCaptor = ArgumentCaptor.forClass(ProductCreation.class);

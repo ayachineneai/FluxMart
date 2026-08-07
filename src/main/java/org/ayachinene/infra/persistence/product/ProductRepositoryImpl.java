@@ -47,8 +47,8 @@ public class ProductRepositoryImpl implements ProductRepository {
         var newProductId = UUID7s.generate();
         var createdAt = LocalDateTime.now();
 
-        insertProduct(product, newProductId, createdAt);
-        insertGalleryImages(product.galleryImageFileIds(), newProductId, createdAt);
+        insertProduct(newProductId, product, createdAt);
+        insertGalleryImages(newProductId, product.galleryImageFileIds(), createdAt);
         specificationWriter.insert(
             newProductId,
             creation.specifications(),
@@ -57,7 +57,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         skuWriter.insert(newProductId, creation.skus(), createdAt);
     }
 
-    private void insertProduct(Product product, UUID7 newProductId, LocalDateTime createdAt) {
+    private void insertProduct(UUID7 newProductId, Product product, LocalDateTime createdAt) {
         var productPo = persistenceConverter.toProductPo(product)
             .setId(newProductId)
             .setVersion(INITIAL_VERSION)
@@ -68,8 +68,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void insertGalleryImages(
+        UUID7 productId,
         List<UUID7> galleryImageFileIds,
-        UUID7 owningProductId,
         LocalDateTime createdAt
     ) {
         if (galleryImageFileIds.isEmpty()) return;
@@ -77,7 +77,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         var images = Streams.withIndex(galleryImageFileIds)
             .map(indexed -> persistenceConverter.toGalleryImagePo(indexed.value())
                 .setId(UUID7s.generate())
-                .setProductId(owningProductId)
+                .setProductId(productId)
                 .setSortOrder(indexed.index())
                 .setCreatedAt(createdAt)
             )
@@ -130,6 +130,6 @@ public class ProductRepositoryImpl implements ProductRepository {
         LocalDateTime createdAt
     ) {
         galleryImageMapper.deleteByProductId(existingProductId);
-        insertGalleryImages(galleryImageFileIds, existingProductId, createdAt);
+        insertGalleryImages(existingProductId, galleryImageFileIds, createdAt);
     }
 }

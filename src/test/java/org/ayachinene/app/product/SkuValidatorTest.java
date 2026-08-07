@@ -33,6 +33,7 @@ class SkuValidatorTest {
 
     @Test
     void rejectsInvalidSkuInput() {
+        assertThrows(ValidationException.class, () -> SkuValidator.validate(List.of()));
         assertThrows(ValidationException.class, () -> SkuValidator.validate(List.of(
                 new SkuInput(null, BigDecimal.ZERO, null, List.of())
         )));

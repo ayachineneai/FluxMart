@@ -18,6 +18,12 @@ public final class SkuSpecificationValidator {
             List<SpecificationInput> specifications,
             List<SkuInput> skus
     ) {
+        if (specifications.isEmpty() && skus.size() != 1) {
+            throw new ValidationException(
+                    "product without specifications must contain exactly one SKU"
+            );
+        }
+
         var valuesBySpecification = valuesBySpecification(specifications);
 
         for (var sku : skus) {
