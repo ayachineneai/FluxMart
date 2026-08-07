@@ -1,12 +1,13 @@
 package org.ayachinene.app.domain.product;
 
+import org.ayachinene.app.domain.product.creation.ProductInput;
 import org.ayachinene.shared.uuid7.UUID7;
-import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.utils.Lists;
+import org.ayachinene.utils.Streams;
 import org.ayachinene.utils.Validates;
+import org.ayachinene.utils.Values;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class ProductValidator {
 
@@ -16,17 +17,14 @@ public final class ProductValidator {
     private ProductValidator() {
     }
 
-    public static CreateProductInput validate(CreateProductInput input) {
-        Objects.requireNonNull(input, "input must not be null");
-        return new CreateProductInput(
+    public static ProductInput validate(ProductInput input) {
+        return new ProductInput(
                 title(input.title()),
                 subtitle(input.subtitle()),
                 description(input.description()),
                 categoryCode(input.categoryCode()),
                 fileResourceId(input.primaryImageFileId(), "primaryImageFileId"),
-                galleryImageFileIds(input.galleryImageFileIds()),
-                input.specifications(),
-                input.skus()
+                galleryImageFileIds(input.galleryImageFileIds())
         );
     }
 
@@ -35,10 +33,9 @@ public final class ProductValidator {
     }
 
     public static String subtitle(String value) {
-        if (value == null) {
-            return null;
-        }
-        return Validates.requiredText(value, "subtitle", MAX_SUBTITLE_LENGTH);
+        return Values.map(value,
+            subtitle -> Validates.requiredText(subtitle, "subtitle", MAX_SUBTITLE_LENGTH)
+        );
     }
 
     public static String description(String value) {
@@ -54,12 +51,11 @@ public final class ProductValidator {
     }
 
     public static List<UUID7> galleryImageFileIds(List<UUID7> values) {
-        var normalized = Lists.nullToEmpty(values).stream()
-                .map(value -> fileResourceId(value, "galleryImageFileIds element"))
-                .toList();
-        Validates.require(
-                Lists.isUnique(normalized),
-                "galleryImageFileIds must not contain duplicates"
+        var normalized = Streams.of(values)
+            .map(value -> fileResourceId(value, "galleryImageFileIds element"))
+            .toList();
+        Validates.require(Lists.isUnique(normalized),
+            "galleryImageFileIds must not contain duplicates"
         );
         return normalized;
     }

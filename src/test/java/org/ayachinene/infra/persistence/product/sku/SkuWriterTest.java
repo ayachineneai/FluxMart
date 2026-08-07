@@ -1,37 +1,34 @@
 package org.ayachinene.infra.persistence.product.sku;
 
 import org.ayachinene.app.domain.money.Money;
-import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.sku.Sku;
 import org.ayachinene.app.domain.product.sku.SkuCode;
 import org.ayachinene.app.domain.product.sku.SkuStatus;
 import org.ayachinene.app.domain.product.sku.SpecificationSelection;
 import org.ayachinene.shared.uuid7.UUID7s;
-import org.ayachinene.infra.persistence.product.ProductMapper;
 import org.ayachinene.infra.persistence.product.converter.SkuPersistenceConverter;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-class SkuRepositoryImplTest {
+class SkuWriterTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     void insertsSkuAndItsSpecificationSelections() {
-        var productMapper = mock(ProductMapper.class);
         var skuMapper = mock(SkuMapper.class);
         var selectionMapper = mock(SkuSpecificationSelectionMapper.class);
         var productId = UUID7s.generate();
-        var productCode = ProductCode.generate();
-        when(productMapper.selectIdByProductCode(productCode)).thenReturn(productId);
+        var createdAt = LocalDateTime.now();
 
         var selection = new SpecificationSelection(
                 UUID7s.generate(),
@@ -46,25 +43,27 @@ class SkuRepositoryImplTest {
                 List.of(selection)
         );
 
-        new SkuRepositoryImpl(
-                productMapper,
+        new SkuWriter(
                 skuMapper,
                 selectionMapper,
                 Mappers.getMapper(SkuPersistenceConverter.class)
-        ).create(productCode, List.of(sku));
+        ).insert(productId, List.of(sku), createdAt);
 
-        var skuCaptor = ArgumentCaptor.forClass(SkuPO.class);
-        verify(skuMapper).insert(skuCaptor.capture());
-        var savedSku = skuCaptor.getValue();
+        var skuCaptor = ArgumentCaptor.forClass(List.class);
+        verify(skuMapper).insertBatch(skuCaptor.capture());
+        var savedSku = (SkuPO) skuCaptor.getValue().getFirst();
         assertNotNull(savedSku.getId());
         assertEquals(productId, savedSku.getProductId());
         assertEquals(sku.skuCode(), savedSku.getSkuCode());
         assertEquals(9900L, savedSku.getPriceAmount());
         assertEquals(0L, savedSku.getVersion());
+        assertEquals(createdAt, savedSku.getCreatedAt());
 
-        var selectionCaptor = ArgumentCaptor.forClass(SkuSpecificationSelectionPO.class);
-        verify(selectionMapper).insert(selectionCaptor.capture());
-        var savedSelection = selectionCaptor.getValue();
+        var selectionCaptor = ArgumentCaptor.forClass(List.class);
+        verify(selectionMapper).insertBatch(selectionCaptor.capture());
+        var savedSelection = (SkuSpecificationSelectionPO) selectionCaptor
+                .getValue()
+                .getFirst();
         assertEquals(savedSku.getId(), savedSelection.getSkuId());
         assertEquals(selection.specificationId(), savedSelection.getSpecificationId());
         assertEquals(

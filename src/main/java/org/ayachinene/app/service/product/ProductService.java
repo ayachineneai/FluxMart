@@ -7,8 +7,6 @@ import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.app.service.Tx;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 public class ProductService {
 
@@ -24,13 +22,10 @@ public class ProductService {
     }
 
     public ProductCode createProduct(CreateProductInput input) {
-        Objects.requireNonNull(input, "input must not be null");
-
-        var newProductCode = ProductCode.generate();
-        var creation = Products.create(newProductCode, input);
+        var creation = Products.create(input);
 
         tx.run(() -> productRepository.create(creation));
 
-        return newProductCode;
+        return creation.product().productCode();
     }
 }

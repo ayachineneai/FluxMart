@@ -1,9 +1,9 @@
 package org.ayachinene.app.product;
 
 import org.ayachinene.app.domain.product.CategoryCode;
-import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.Products;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
+import org.ayachinene.app.domain.product.creation.ProductInput;
 import org.ayachinene.app.domain.product.creation.SelectionInput;
 import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
@@ -22,14 +22,15 @@ class ProductCreationTest {
     @Test
     void createsSpecificationsAndResolvesSkuSelections() {
         var creation = Products.create(
-                ProductCode.generate(),
                 new CreateProductInput(
-                        "T-Shirt",
-                        null,
-                        "Cotton",
-                        new CategoryCode("TSHIRT"),
-                        UUID7s.generate(),
-                        List.of(),
+                        new ProductInput(
+                                "T-Shirt",
+                                null,
+                                "Cotton",
+                                new CategoryCode("TSHIRT"),
+                                UUID7s.generate(),
+                                List.of()
+                        ),
                         List.of(new SpecificationInput("颜色", List.of("黑色"))),
                         List.of(new SkuInput(
                                 "TSHIRT-BLACK",

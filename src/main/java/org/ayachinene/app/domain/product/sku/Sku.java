@@ -5,7 +5,6 @@ import org.ayachinene.app.exception.ValidationException;
 import org.ayachinene.shared.uuid7.UUID7;
 
 import java.util.List;
-import java.util.Objects;
 
 public record Sku(
         SkuCode skuCode,
@@ -17,19 +16,7 @@ public record Sku(
 ) {
 
     public Sku {
-        Objects.requireNonNull(skuCode, "skuCode must not be null");
-        Objects.requireNonNull(status, "status must not be null");
-        Objects.requireNonNull(price, "price must not be null");
-        specificationSelections = List.copyOf(
-                Objects.requireNonNull(
-                        specificationSelections,
-                        "specificationSelections must not be null"
-                )
-        );
-
-        for (var selection : specificationSelections) {
-            Objects.requireNonNull(selection, "specificationSelections element must not be null");
-        }
+        specificationSelections = List.copyOf(specificationSelections);
         var uniqueSpecificationCount = specificationSelections.stream()
                 .map(SpecificationSelection::specificationId)
                 .distinct()

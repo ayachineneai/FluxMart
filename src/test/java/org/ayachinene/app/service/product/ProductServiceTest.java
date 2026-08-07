@@ -5,6 +5,7 @@ import org.ayachinene.app.domain.product.ProductRepository;
 import org.ayachinene.app.domain.product.ProductStatus;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.app.domain.product.creation.ProductCreation;
+import org.ayachinene.app.domain.product.creation.ProductInput;
 import org.ayachinene.app.domain.product.creation.SelectionInput;
 import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
@@ -39,11 +40,15 @@ class ProductServiceTest {
         );
 
         var productCode = service.createProduct(new CreateProductInput(
-                "  纯棉 T 恤  ",
-                null,
-                "  100% 纯棉  ",
-                new CategoryCode("TSHIRT"),
-                UUID7s.generate(),
+                new ProductInput(
+                        "  纯棉 T 恤  ",
+                        null,
+                        "  100% 纯棉  ",
+                        new CategoryCode("TSHIRT"),
+                        UUID7s.generate(),
+                        List.of()
+                ),
+                List.of(),
                 List.of()
         ));
 
@@ -67,12 +72,14 @@ class ProductServiceTest {
         );
 
         var input = new CreateProductInput(
-                "纯棉 T 恤",
-                null,
-                "100% 纯棉",
-                new CategoryCode("TSHIRT"),
-                UUID7s.generate(),
-                List.of(),
+                new ProductInput(
+                        "纯棉 T 恤",
+                        null,
+                        "100% 纯棉",
+                        new CategoryCode("TSHIRT"),
+                        UUID7s.generate(),
+                        List.of()
+                ),
                 List.of(new SpecificationInput("颜色", List.of("黑色"))),
                 List.of(new SkuInput(
                         null,
@@ -103,12 +110,14 @@ class ProductServiceTest {
         );
 
         var productCode = service.createProduct(new CreateProductInput(
-                "纯棉 T 恤",
-                null,
-                "100% 纯棉",
-                new CategoryCode("TSHIRT"),
-                UUID7s.generate(),
-                List.of(),
+                new ProductInput(
+                        "纯棉 T 恤",
+                        null,
+                        "100% 纯棉",
+                        new CategoryCode("TSHIRT"),
+                        UUID7s.generate(),
+                        List.of()
+                ),
                 List.of(new SpecificationInput("颜色", List.of("黑色"))),
                 List.of(new SkuInput(
                         "TSHIRT-BLACK",

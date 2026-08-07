@@ -1,12 +1,11 @@
-package org.ayachinene.app.domain.product;
+package org.ayachinene.app.domain.product.creation;
 
+import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.shared.uuid7.UUID7;
 
 import java.util.List;
 
-public record Product(
-        ProductCode productCode,
-        ProductStatus status,
+public record ProductInput(
         String title,
         String subtitle,
         String description,
@@ -14,7 +13,4 @@ public record Product(
         UUID7 primaryImageFileId,
         List<UUID7> galleryImageFileIds
 ) {
-    public Product {
-        galleryImageFileIds = List.copyOf(galleryImageFileIds);
-    }
 }

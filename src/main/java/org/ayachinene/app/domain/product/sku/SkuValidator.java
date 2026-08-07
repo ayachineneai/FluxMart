@@ -6,6 +6,7 @@ import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.exception.ValidationException;
 import org.ayachinene.utils.BigDecimals;
 import org.ayachinene.utils.Lists;
+import org.ayachinene.utils.Streams;
 import org.ayachinene.utils.Validates;
 import org.ayachinene.utils.Values;
 
@@ -23,7 +24,7 @@ public final class SkuValidator {
     }
 
     public static List<SkuInput> validate(List<SkuInput> inputs) {
-        var skus = Lists.nullToEmpty(inputs).stream()
+        var skus = Streams.of(inputs)
                 .map(SkuValidator::validate)
                 .toList();
 
@@ -69,7 +70,7 @@ public final class SkuValidator {
     }
 
     private static List<SelectionInput> selections(List<SelectionInput> inputs) {
-        var selections = Lists.nullToEmpty(inputs).stream()
+        var selections = Streams.of(inputs)
                 .map(SkuValidator::selection)
                 .toList();
         Validates.require(

@@ -5,8 +5,8 @@ import org.ayachinene.app.domain.product.ProductNotFoundException;
 import org.ayachinene.app.domain.product.ProductRepository;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
 import org.ayachinene.app.domain.product.creation.ProductCreation;
-import org.ayachinene.app.domain.product.sku.SkuRepository;
-import org.ayachinene.app.domain.product.specification.SpecificationRepository;
+import org.ayachinene.infra.persistence.product.sku.SkuWriter;
+import org.ayachinene.infra.persistence.product.specification.SpecificationWriter;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.converter.ProductPersistenceConverter;
@@ -23,21 +23,21 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductMapper productMapper;
     private final ProductGalleryImageMapper galleryImageMapper;
-    private final SpecificationRepository specificationRepository;
-    private final SkuRepository skuRepository;
+    private final SpecificationWriter specificationWriter;
+    private final SkuWriter skuWriter;
     private final ProductPersistenceConverter persistenceConverter;
 
     public ProductRepositoryImpl(
-            ProductMapper productMapper,
-            ProductGalleryImageMapper galleryImageMapper,
-            SpecificationRepository specificationRepository,
-            SkuRepository skuRepository,
-            ProductPersistenceConverter persistenceConverter
+        ProductMapper productMapper,
+        ProductGalleryImageMapper galleryImageMapper,
+        SpecificationWriter specificationWriter,
+        SkuWriter skuWriter,
+        ProductPersistenceConverter persistenceConverter
     ) {
         this.productMapper = productMapper;
         this.galleryImageMapper = galleryImageMapper;
-        this.specificationRepository = specificationRepository;
-        this.skuRepository = skuRepository;
+        this.specificationWriter = specificationWriter;
+        this.skuWriter = skuWriter;
         this.persistenceConverter = persistenceConverter;
     }
 
@@ -49,36 +49,40 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         insertProduct(product, newProductId, createdAt);
         insertGalleryImages(product.galleryImageFileIds(), newProductId, createdAt);
-        specificationRepository.create(
-                product.productCode(),
-                creation.specifications()
+        specificationWriter.insert(
+            newProductId,
+            creation.specifications(),
+            createdAt
         );
-        skuRepository.create(product.productCode(), creation.skus());
+        skuWriter.insert(newProductId, creation.skus(), createdAt);
     }
 
     private void insertProduct(Product product, UUID7 newProductId, LocalDateTime createdAt) {
         var productPo = persistenceConverter.toProductPo(product)
-                .setId(newProductId)
-                .setVersion(INITIAL_VERSION)
-                .setCreatedAt(createdAt)
-                .setUpdatedAt(createdAt);
+            .setId(newProductId)
+            .setVersion(INITIAL_VERSION)
+            .setCreatedAt(createdAt)
+            .setUpdatedAt(createdAt);
 
         productMapper.insert(productPo);
     }
 
     private void insertGalleryImages(
-            List<UUID7> galleryImageFileIds,
-            UUID7 owningProductId,
-            LocalDateTime createdAt
+        List<UUID7> galleryImageFileIds,
+        UUID7 owningProductId,
+        LocalDateTime createdAt
     ) {
-        Streams.withIndex(galleryImageFileIds).forEach(x -> {
-            var image = persistenceConverter.toGalleryImagePo(x.value())
+        if (galleryImageFileIds.isEmpty()) return;
+
+        var images = Streams.withIndex(galleryImageFileIds)
+            .map(indexed -> persistenceConverter.toGalleryImagePo(indexed.value())
                 .setId(UUID7s.generate())
                 .setProductId(owningProductId)
-                .setSortOrder(x.index())
-                .setCreatedAt(createdAt);
-            galleryImageMapper.insert(image);
-        });
+                .setSortOrder(indexed.index())
+                .setCreatedAt(createdAt)
+            )
+            .toList();
+        galleryImageMapper.insertBatch(images);
     }
 
     @Override
@@ -94,36 +98,36 @@ public class ProductRepositoryImpl implements ProductRepository {
         var updatedAt = LocalDateTime.now();
         updateProduct(product, expectedVersion, updatedAt);
         replaceGalleryImages(
-                product.galleryImageFileIds(),
-                existingProductId,
-                updatedAt
+            product.galleryImageFileIds(),
+            existingProductId,
+            updatedAt
         );
     }
 
     private void updateProduct(
-            Product product,
-            long expectedVersion,
-            LocalDateTime updatedAt
+        Product product,
+        long expectedVersion,
+        LocalDateTime updatedAt
     ) {
         var productPo = persistenceConverter.toProductPo(product)
-                .setUpdatedAt(updatedAt);
+            .setUpdatedAt(updatedAt);
 
         var affectedRows = productMapper.updateByProductCodeAndVersion(
-                productPo,
-                expectedVersion
+            productPo,
+            expectedVersion
         );
         if (affectedRows == 0) {
             throw new ProductVersionConflictException(
-                    product.productCode(),
-                    expectedVersion
+                product.productCode(),
+                expectedVersion
             );
         }
     }
 
     private void replaceGalleryImages(
-            List<UUID7> galleryImageFileIds,
-            UUID7 existingProductId,
-            LocalDateTime createdAt
+        List<UUID7> galleryImageFileIds,
+        UUID7 existingProductId,
+        LocalDateTime createdAt
     ) {
         galleryImageMapper.deleteByProductId(existingProductId);
         insertGalleryImages(galleryImageFileIds, existingProductId, createdAt);

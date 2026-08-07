@@ -1,5 +1,6 @@
-package org.ayachinene.api.product;
+package org.ayachinene.api.product.controller;
 
+import org.ayachinene.api.product.ProductApiMapper;
 import org.ayachinene.api.product.data.CreateProductRequest;
 import org.ayachinene.api.product.data.CreateProductResponse;
 import org.ayachinene.app.service.product.ProductService;

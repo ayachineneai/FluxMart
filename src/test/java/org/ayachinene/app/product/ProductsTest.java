@@ -2,6 +2,7 @@ package org.ayachinene.app.product;
 
 import org.ayachinene.app.domain.product.*;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
+import org.ayachinene.app.domain.product.creation.ProductInput;
 import org.ayachinene.app.domain.product.creation.SelectionInput;
 import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
@@ -15,17 +16,17 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProductsTest {
 
     @Test
-    void createsTheSameDraftForTheSameInputsWithoutMutatingThem() {
+    void createsDraftWithoutMutatingInput() {
         var primaryImageFileId = fileId("018f6b5c-7c00-7000-8000-000000000010");
         var galleryImageFileId = fileId("018f6b5c-7c00-7000-8000-000000000011");
         var gallery = new ArrayList<>(List.of(galleryImageFileId));
-        var input = new CreateProductInput(
+        var productInput = new ProductInput(
                 "  FluxMart T-Shirt  ",
                 "  Soft  ",
                 "  Cotton T-Shirt  ",
@@ -33,15 +34,8 @@ class ProductsTest {
                 primaryImageFileId,
                 gallery
         );
-        var productCode = new ProductCode("PRD_23456789ABCDEFGHJKMN");
-
-        input = new CreateProductInput(
-                input.title(),
-                input.subtitle(),
-                input.description(),
-                input.categoryCode(),
-                input.primaryImageFileId(),
-                input.galleryImageFileIds(),
+        var input = new CreateProductInput(
+                productInput,
                 List.of(new SpecificationInput("颜色", List.of("黑色"))),
                 List.of(new SkuInput(
                         "TSHIRT-BLACK",
@@ -51,22 +45,20 @@ class ProductsTest {
                 ))
         );
 
-        var first = Products.create(productCode, input).product();
-        var second = Products.create(productCode, input).product();
+        var product = Products.create(input).product();
 
-        assertEquals(first, second);
-        assertNotSame(first, second);
-        assertEquals(ProductStatus.DRAFT, first.status());
-        assertEquals("FluxMart T-Shirt", first.title());
-        assertEquals(List.of(galleryImageFileId), first.galleryImageFileIds());
+        assertTrue(product.productCode().value().startsWith("PRD_"));
+        assertEquals(ProductStatus.DRAFT, product.status());
+        assertEquals("FluxMart T-Shirt", product.title());
+        assertEquals(List.of(galleryImageFileId), product.galleryImageFileIds());
 
         gallery.add(fileId("018f6b5c-7c00-7000-8000-000000000012"));
-        assertEquals(List.of(galleryImageFileId), first.galleryImageFileIds());
+        assertEquals(List.of(galleryImageFileId), product.galleryImageFileIds());
     }
 
     @Test
     void rejectsDuplicateGalleryUrls() {
-        var input = new CreateProductInput(
+        var input = new ProductInput(
                 "T-Shirt",
                 null,
                 "Cotton T-Shirt",

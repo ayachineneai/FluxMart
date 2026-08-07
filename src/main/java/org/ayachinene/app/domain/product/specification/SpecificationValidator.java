@@ -2,6 +2,7 @@ package org.ayachinene.app.domain.product.specification;
 
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
 import org.ayachinene.utils.Lists;
+import org.ayachinene.utils.Streams;
 import org.ayachinene.utils.Validates;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public final class SpecificationValidator {
     }
 
     public static List<SpecificationInput> validate(List<SpecificationInput> inputs) {
-        var specifications = Lists.nullToEmpty(inputs).stream()
+        var specifications = Streams.of(inputs)
                 .map(SpecificationValidator::validate)
                 .toList();
         Validates.require(
@@ -35,7 +36,7 @@ public final class SpecificationValidator {
     }
 
     private static List<String> values(List<String> inputs, String specificationName) {
-        var values = Lists.nullToEmpty(inputs).stream()
+        var values = Streams.of(inputs)
                 .map(input -> Validates.requiredText(
                         input,
                         "specification value",

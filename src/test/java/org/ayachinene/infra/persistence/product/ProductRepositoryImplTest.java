@@ -6,8 +6,8 @@ import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.ProductStatus;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
 import org.ayachinene.app.domain.product.creation.ProductCreation;
-import org.ayachinene.app.domain.product.sku.SkuRepository;
-import org.ayachinene.app.domain.product.specification.SpecificationRepository;
+import org.ayachinene.infra.persistence.product.sku.SkuWriter;
+import org.ayachinene.infra.persistence.product.specification.SpecificationWriter;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.converter.ProductPersistenceConverter;
@@ -24,20 +24,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ProductRepositoryImplTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     void insertsProductAndOrderedGalleryImages() {
         var productMapper = mock(ProductMapper.class);
         var galleryMapper = mock(ProductGalleryImageMapper.class);
-        var specificationRepository = mock(SpecificationRepository.class);
-        var skuRepository = mock(SkuRepository.class);
+        var specificationWriter = mock(SpecificationWriter.class);
+        var skuWriter = mock(SkuWriter.class);
         when(productMapper.insert(any(ProductPO.class))).thenReturn(1);
-        when(galleryMapper.insert(any(ProductGalleryImagePO.class))).thenReturn(1);
 
         var firstImage = UUID7s.generate();
         var secondImage = UUID7s.generate();
@@ -55,8 +54,8 @@ class ProductRepositoryImplTest {
         new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                specificationRepository,
-                skuRepository,
+                specificationWriter,
+                skuWriter,
                 Mappers.getMapper(ProductPersistenceConverter.class)
         ).create(new ProductCreation(product, List.of(), List.of()));
 
@@ -68,19 +67,30 @@ class ProductRepositoryImplTest {
         assertEquals(ProductStatus.DRAFT, savedProduct.getStatus());
         assertEquals(0L, savedProduct.getVersion());
 
-        var galleryCaptor = ArgumentCaptor.forClass(ProductGalleryImagePO.class);
-        verify(galleryMapper, times(2)).insert(galleryCaptor.capture());
-        var savedImages = galleryCaptor.getAllValues();
-        assertEquals(savedProduct.getId(), savedImages.get(0).getProductId());
-        assertEquals(firstImage, savedImages.get(0).getFileId());
-        assertEquals(0, savedImages.get(0).getSortOrder());
-        assertEquals(secondImage, savedImages.get(1).getFileId());
-        assertEquals(1, savedImages.get(1).getSortOrder());
-        verify(specificationRepository).create(product.productCode(), List.of());
-        verify(skuRepository).create(product.productCode(), List.of());
+        var galleryCaptor = ArgumentCaptor.forClass(List.class);
+        verify(galleryMapper).insertBatch(galleryCaptor.capture());
+        var savedImages = galleryCaptor.getValue();
+        var savedFirstImage = (ProductGalleryImagePO) savedImages.get(0);
+        var savedSecondImage = (ProductGalleryImagePO) savedImages.get(1);
+        assertEquals(savedProduct.getId(), savedFirstImage.getProductId());
+        assertEquals(firstImage, savedFirstImage.getFileId());
+        assertEquals(0, savedFirstImage.getSortOrder());
+        assertEquals(secondImage, savedSecondImage.getFileId());
+        assertEquals(1, savedSecondImage.getSortOrder());
+        verify(specificationWriter).insert(
+                eq(savedProduct.getId()),
+                eq(List.of()),
+                eq(savedProduct.getCreatedAt())
+        );
+        verify(skuWriter).insert(
+                eq(savedProduct.getId()),
+                eq(List.of()),
+                eq(savedProduct.getCreatedAt())
+        );
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void updatesProductByVersionAndReplacesGalleryImages() {
         var productMapper = mock(ProductMapper.class);
         var galleryMapper = mock(ProductGalleryImageMapper.class);
@@ -89,7 +99,6 @@ class ProductRepositoryImplTest {
                 .thenReturn(existingProductId);
         when(productMapper.updateByProductCodeAndVersion(any(ProductPO.class), eq(3L)))
                 .thenReturn(1);
-        when(galleryMapper.insert(any(ProductGalleryImagePO.class))).thenReturn(1);
 
         var galleryImage = UUID7s.generate();
         var product = productWithGallery(List.of(galleryImage));
@@ -102,11 +111,12 @@ class ProductRepositoryImplTest {
         assertNotNull(productCaptor.getValue().getUpdatedAt());
         verify(galleryMapper).deleteByProductId(existingProductId);
 
-        var galleryCaptor = ArgumentCaptor.forClass(ProductGalleryImagePO.class);
-        verify(galleryMapper).insert(galleryCaptor.capture());
-        assertEquals(existingProductId, galleryCaptor.getValue().getProductId());
-        assertEquals(galleryImage, galleryCaptor.getValue().getFileId());
-        assertEquals(0, galleryCaptor.getValue().getSortOrder());
+        var galleryCaptor = ArgumentCaptor.forClass(List.class);
+        verify(galleryMapper).insertBatch(galleryCaptor.capture());
+        var savedImage = (ProductGalleryImagePO) galleryCaptor.getValue().getFirst();
+        assertEquals(existingProductId, savedImage.getProductId());
+        assertEquals(galleryImage, savedImage.getFileId());
+        assertEquals(0, savedImage.getSortOrder());
     }
 
     @Test
@@ -125,7 +135,7 @@ class ProductRepositoryImplTest {
                 () -> repository(productMapper, galleryMapper).update(product, 3L)
         );
         verify(galleryMapper, never()).deleteByProductId(any());
-        verify(galleryMapper, never()).insert(any(ProductGalleryImagePO.class));
+        verify(galleryMapper, never()).insertBatch(any());
     }
 
     private static Product productWithGallery(List<UUID7> galleryImages) {
@@ -148,8 +158,8 @@ class ProductRepositoryImplTest {
         return new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                mock(SpecificationRepository.class),
-                mock(SkuRepository.class),
+                mock(SpecificationWriter.class),
+                mock(SkuWriter.class),
                 Mappers.getMapper(ProductPersistenceConverter.class)
         );
     }

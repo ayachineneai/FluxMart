@@ -1,5 +1,6 @@
 package org.ayachinene.api.product;
 
+import org.ayachinene.api.product.controller.ProductController;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.app.service.product.ProductService;
@@ -37,8 +38,8 @@ class ProductControllerTest {
         var inputCaptor = ArgumentCaptor.forClass(CreateProductInput.class);
         verify(productService).createProduct(inputCaptor.capture());
         var input = inputCaptor.getValue();
-        assertEquals("纯棉 T 恤", input.title());
-        assertEquals("TSHIRT", input.categoryCode().value());
+        assertEquals("纯棉 T 恤", input.product().title());
+        assertEquals("TSHIRT", input.product().categoryCode().value());
         assertEquals(1, input.specifications().size());
         assertEquals(1, input.skus().size());
     }
