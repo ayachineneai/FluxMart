@@ -1,6 +1,6 @@
 package org.ayachinene.app.product.sku;
 
-import org.ayachinene.app.domain.product.sku.SkuCode;
+import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 

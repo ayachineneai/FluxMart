@@ -1,9 +1,9 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.SkuSpecificationValidator;
-import org.ayachinene.app.domain.product.creation.SelectionInput;
-import org.ayachinene.app.domain.product.creation.SkuInput;
-import org.ayachinene.app.domain.product.creation.SpecificationInput;
+import org.ayachinene.app.product.domain.SkuSpecificationValidator;
+import org.ayachinene.app.product.creation.SelectionInput;
+import org.ayachinene.app.product.creation.SkuInput;
+import org.ayachinene.app.product.creation.SpecificationInput;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 

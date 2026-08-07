@@ -1,11 +1,12 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.*;
-import org.ayachinene.app.domain.product.creation.CreateProductInput;
-import org.ayachinene.app.domain.product.creation.ProductInput;
-import org.ayachinene.app.domain.product.creation.SelectionInput;
-import org.ayachinene.app.domain.product.creation.SkuInput;
-import org.ayachinene.app.domain.product.creation.SpecificationInput;
+import org.ayachinene.app.product.domain.*;
+import org.ayachinene.app.product.creation.CreateProductInput;
+import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.SelectionInput;
+import org.ayachinene.app.product.creation.SkuInput;
+import org.ayachinene.app.product.creation.SpecificationInput;
+import org.ayachinene.app.product.publication.ProductPublicationState;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,21 @@ class ProductsTest {
         assertThrows(
                 ValidationException.class,
                 () -> ProductValidator.validate(input)
+        );
+    }
+
+    @Test
+    void rejectsPublishingWithUnexpectedVersion() {
+        var productCode = ProductCode.generate();
+        var state = new ProductPublicationState(
+                productCode,
+                ProductStatus.DRAFT,
+                4L
+        );
+
+        assertThrows(
+                ProductVersionConflictException.class,
+                () -> Products.publish(state, 3L, true)
         );
     }
 

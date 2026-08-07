@@ -1,6 +1,6 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.ProductValidator;
+import org.ayachinene.app.product.domain.ProductValidator;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 import org.ayachinene.app.exception.ValidationException;

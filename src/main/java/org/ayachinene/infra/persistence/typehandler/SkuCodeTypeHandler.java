@@ -4,7 +4,7 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.ayachinene.app.domain.product.sku.SkuCode;
+import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.utils.Values;
 
 import java.sql.CallableStatement;

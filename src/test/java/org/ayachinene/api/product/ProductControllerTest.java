@@ -1,9 +1,9 @@
 package org.ayachinene.api.product;
 
 import org.ayachinene.api.product.controller.ProductController;
-import org.ayachinene.app.domain.product.ProductCode;
-import org.ayachinene.app.domain.product.creation.CreateProductInput;
-import org.ayachinene.app.service.product.ProductService;
+import org.ayachinene.app.product.domain.ProductCode;
+import org.ayachinene.app.product.creation.CreateProductInput;
+import org.ayachinene.app.product.ProductService;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.api.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;

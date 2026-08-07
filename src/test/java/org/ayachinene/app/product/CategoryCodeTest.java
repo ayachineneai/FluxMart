@@ -1,6 +1,6 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.CategoryCode;
+import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 

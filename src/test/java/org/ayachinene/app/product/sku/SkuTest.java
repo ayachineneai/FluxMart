@@ -1,10 +1,10 @@
 package org.ayachinene.app.product.sku;
 
 import org.ayachinene.app.domain.money.Money;
-import org.ayachinene.app.domain.product.sku.Sku;
-import org.ayachinene.app.domain.product.sku.SkuCode;
-import org.ayachinene.app.domain.product.sku.SkuStatus;
-import org.ayachinene.app.domain.product.sku.SpecificationSelection;
+import org.ayachinene.app.product.domain.sku.Sku;
+import org.ayachinene.app.product.domain.sku.SkuCode;
+import org.ayachinene.app.product.domain.sku.SkuStatus;
+import org.ayachinene.app.product.domain.sku.SpecificationSelection;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;

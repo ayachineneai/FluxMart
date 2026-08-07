@@ -5,7 +5,7 @@ import org.ayachinene.api.product.data.CreateProductRequest;
 import org.ayachinene.api.product.data.CreateProductResponse;
 import org.ayachinene.api.product.data.PublishProductRequest;
 import org.ayachinene.api.product.data.PublishProductResponse;
-import org.ayachinene.app.service.product.ProductService;
+import org.ayachinene.app.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

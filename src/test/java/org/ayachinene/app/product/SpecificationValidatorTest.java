@@ -1,7 +1,7 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.specification.SpecificationValidator;
-import org.ayachinene.app.domain.product.creation.SpecificationInput;
+import org.ayachinene.app.product.domain.specification.SpecificationValidator;
+import org.ayachinene.app.product.creation.SpecificationInput;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 

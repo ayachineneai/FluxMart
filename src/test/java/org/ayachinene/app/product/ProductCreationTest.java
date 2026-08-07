@@ -1,14 +1,14 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.product.CategoryCode;
-import org.ayachinene.app.domain.product.Products;
-import org.ayachinene.app.domain.product.creation.CreateProductInput;
-import org.ayachinene.app.domain.product.creation.ProductInput;
-import org.ayachinene.app.domain.product.creation.SelectionInput;
-import org.ayachinene.app.domain.product.creation.SkuInput;
-import org.ayachinene.app.domain.product.creation.SpecificationInput;
-import org.ayachinene.app.domain.product.sku.SkuStatus;
-import org.ayachinene.app.domain.product.specification.SpecificationStatus;
+import org.ayachinene.app.product.domain.CategoryCode;
+import org.ayachinene.app.product.domain.Products;
+import org.ayachinene.app.product.creation.CreateProductInput;
+import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.SelectionInput;
+import org.ayachinene.app.product.creation.SkuInput;
+import org.ayachinene.app.product.creation.SpecificationInput;
+import org.ayachinene.app.product.domain.sku.SkuStatus;
+import org.ayachinene.app.product.domain.specification.SpecificationStatus;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 
