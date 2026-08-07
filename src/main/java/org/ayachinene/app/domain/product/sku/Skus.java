@@ -5,7 +5,6 @@ import org.ayachinene.app.domain.product.creation.SelectionInput;
 import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.specification.Specification;
 import org.ayachinene.app.domain.product.specification.SpecificationValue;
-import org.ayachinene.app.uuid7.UUID7s;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ public final class Skus {
     private Skus() {
     }
 
-    public static List<Sku> mkSkus(
+    public static List<Sku> create(
             List<SkuInput> inputs,
             List<Specification> specifications
     ) {
@@ -25,29 +24,29 @@ public final class Skus {
                 .collect(Collectors.toUnmodifiableMap(
                         Specification::name,
                         Function.identity()
-                ));
+        ));
         return inputs.stream()
-                .map(input -> mkSku(input, specificationsByName))
+                .map(input -> createSku(input, specificationsByName))
                 .toList();
     }
 
-    private static Sku mkSku(
+    private static Sku createSku(
             SkuInput input,
             Map<String, Specification> specificationsByName
     ) {
         return new Sku(
-                new SkuCode(UUID7s.generate()),
+                SkuCode.generate(),
                 input.merchantSkuCode(),
                 SkuStatus.DISABLED,
                 new Money(input.price()),
                 input.imageFileId(),
                 input.selections().stream()
-                        .map(selection -> mkSelection(selection, specificationsByName))
+                        .map(selection -> createSelection(selection, specificationsByName))
                         .toList()
         );
     }
 
-    private static SpecificationSelection mkSelection(
+    private static SpecificationSelection createSelection(
             SelectionInput input,
             Map<String, Specification> specificationsByName
     ) {

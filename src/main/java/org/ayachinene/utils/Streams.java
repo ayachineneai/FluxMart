@@ -29,6 +29,12 @@ public final class Streams {
         return values == null ? Stream.empty() : values.stream();
     }
 
+    public static Stream<Character> of(char[] values) {
+        if (values == null) return Stream.empty();
+        return IntStream.range(0, values.length)
+                .mapToObj(index -> values[index]);
+    }
+
     public static <T> Stream<WithIndex<T>> withIndex(java.util.List<T> values) {
         var normalized = Lists.nullToEmpty(values);
         return IntStream.range(0, normalized.size())

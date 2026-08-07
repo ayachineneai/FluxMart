@@ -3,7 +3,7 @@ package org.ayachinene.infra.persistence.product;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.ibatis.annotations.Mapper;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 @Mapper
 public interface ProductGalleryImageMapper extends BaseMapper<ProductGalleryImagePO> {

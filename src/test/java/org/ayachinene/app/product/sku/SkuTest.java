@@ -5,9 +5,8 @@ import org.ayachinene.app.domain.product.sku.Sku;
 import org.ayachinene.app.domain.product.sku.SkuCode;
 import org.ayachinene.app.domain.product.sku.SkuStatus;
 import org.ayachinene.app.domain.product.sku.SpecificationSelection;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
+import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -22,7 +21,7 @@ class SkuTest {
     void copiesSpecificationSelections() {
         var selections = new java.util.ArrayList<SpecificationSelection>();
         var sku = new Sku(
-                new SkuCode(UUID7s.generate()),
+                SkuCode.generate(),
                 "MERCHANT-001",
                 SkuStatus.ENABLED,
                 new Money(new BigDecimal("99.00")),
@@ -37,10 +36,10 @@ class SkuTest {
 
     @Test
     void rejectsTwoValuesForTheSameSpecification() {
-        var specificationId = new SpecificationId(UUID7s.generate());
+        var specificationId = UUID7s.generate();
 
-        assertThrows(IllegalArgumentException.class, () -> new Sku(
-                new SkuCode(UUID7s.generate()),
+        assertThrows(ValidationException.class, () -> new Sku(
+                SkuCode.generate(),
                 null,
                 SkuStatus.ENABLED,
                 new Money(new BigDecimal("99.00")),
@@ -48,11 +47,11 @@ class SkuTest {
                 List.of(
                         new SpecificationSelection(
                                 specificationId,
-                                new SpecificationValueId(UUID7s.generate())
+                                UUID7s.generate()
                         ),
                         new SpecificationSelection(
                                 specificationId,
-                                new SpecificationValueId(UUID7s.generate())
+                                UUID7s.generate()
                         )
                 )
         ));
@@ -60,8 +59,8 @@ class SkuTest {
 
     private static SpecificationSelection selection() {
         return new SpecificationSelection(
-                new SpecificationId(UUID7s.generate()),
-                new SpecificationValueId(UUID7s.generate())
+                UUID7s.generate(),
+                UUID7s.generate()
         );
     }
 }

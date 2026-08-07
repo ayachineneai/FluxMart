@@ -1,7 +1,7 @@
 package org.ayachinene.infra.persistence.product.converter;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.Product;
+import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.infra.persistence.product.ProductGalleryImagePO;
 import org.ayachinene.infra.persistence.product.ProductPO;
 import org.mapstruct.Mapper;
@@ -22,8 +22,8 @@ public interface ProductPersistenceConverter {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "productId", ignore = true)
-    @Mapping(target = "fileId", source = "fileResourceId")
+    @Mapping(target = "fileId", source = "fileId")
     @Mapping(target = "sortOrder", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    ProductGalleryImagePO toGalleryImagePo(FileResourceId fileResourceId);
+    ProductGalleryImagePO toGalleryImagePo(UUID7 fileId);
 }

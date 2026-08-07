@@ -1,5 +1,6 @@
-package org.ayachinene.app.uuid7;
+package org.ayachinene.shared.uuid7;
 
+import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -20,6 +21,18 @@ class UUID7Test {
         assertTrue(result.isRight());
         assertEquals(7, result.get().getValue().version());
         assertEquals(2, result.get().getValue().variant());
+    }
+
+    @Test
+    void parsesValidatedExternalText() {
+        assertEquals(
+                UUID7s.fromStringUnsafe(UUID7_TEXT),
+                UUID7.fromString("  " + UUID7_TEXT + "  ", "fileResourceId")
+        );
+        assertThrows(
+                ValidationException.class,
+                () -> UUID7.fromString("not-a-uuid7", "fileResourceId")
+        );
     }
 
     @Test

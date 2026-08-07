@@ -1,9 +1,7 @@
 package org.ayachinene.infra.persistence.product.sku;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
 
@@ -12,8 +10,8 @@ public class SkuSpecificationSelectionPO {
 
     private UUID7 id;
     private UUID7 skuId;
-    private SpecificationId specificationId;
-    private SpecificationValueId specificationValueId;
+    private UUID7 specificationId;
+    private UUID7 specificationValueId;
     private LocalDateTime createdAt;
 
     public UUID7 getId() {
@@ -34,23 +32,23 @@ public class SkuSpecificationSelectionPO {
         return this;
     }
 
-    public SpecificationId getSpecificationId() {
+    public UUID7 getSpecificationId() {
         return specificationId;
     }
 
     public SkuSpecificationSelectionPO setSpecificationId(
-            SpecificationId specificationId
+            UUID7 specificationId
     ) {
         this.specificationId = specificationId;
         return this;
     }
 
-    public SpecificationValueId getSpecificationValueId() {
+    public UUID7 getSpecificationValueId() {
         return specificationValueId;
     }
 
     public SkuSpecificationSelectionPO setSpecificationValueId(
-            SpecificationValueId specificationValueId
+            UUID7 specificationValueId
     ) {
         this.specificationValueId = specificationValueId;
         return this;

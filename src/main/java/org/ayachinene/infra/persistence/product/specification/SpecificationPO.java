@@ -1,16 +1,15 @@
 package org.ayachinene.infra.persistence.product.specification;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
 import org.ayachinene.app.domain.product.specification.SpecificationStatus;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
 
 @TableName("product_specification")
 public class SpecificationPO {
 
-    private SpecificationId id;
+    private UUID7 id;
     private UUID7 productId;
     private String name;
     private SpecificationStatus status;
@@ -18,11 +17,11 @@ public class SpecificationPO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public SpecificationId getId() {
+    public UUID7 getId() {
         return id;
     }
 
-    public SpecificationPO setId(SpecificationId id) {
+    public SpecificationPO setId(UUID7 id) {
         this.id = id;
         return this;
     }

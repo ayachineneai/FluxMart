@@ -2,11 +2,9 @@ package org.ayachinene.infra.persistence.product.specification;
 
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.specification.Specification;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
 import org.ayachinene.app.domain.product.specification.SpecificationStatus;
 import org.ayachinene.app.domain.product.specification.SpecificationValue;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.ProductMapper;
 import org.ayachinene.infra.persistence.product.converter.SpecificationPersistenceConverter;
 import org.junit.jupiter.api.Test;
@@ -30,13 +28,13 @@ class SpecificationRepositoryImplTest {
         var specificationMapper = mock(SpecificationMapper.class);
         var valueMapper = mock(SpecificationValueMapper.class);
         var productId = UUID7s.generate();
-        var productCode = new ProductCode(UUID7s.generate());
+        var productCode = ProductCode.generate();
         when(productMapper.selectIdByProductCode(productCode)).thenReturn(productId);
 
         var black = value("黑色");
         var white = value("白色");
         var specification = new Specification(
-                new SpecificationId(UUID7s.generate()),
+                UUID7s.generate(),
                 "颜色",
                 SpecificationStatus.ENABLED,
                 List.of(black, white)
@@ -65,7 +63,7 @@ class SpecificationRepositoryImplTest {
 
     private static SpecificationValue value(String displayName) {
         return new SpecificationValue(
-                new SpecificationValueId(UUID7s.generate()),
+                UUID7s.generate(),
                 displayName,
                 SpecificationStatus.ENABLED
         );

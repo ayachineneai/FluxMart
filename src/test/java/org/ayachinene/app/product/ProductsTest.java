@@ -1,13 +1,17 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.*;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.app.domain.product.creation.SelectionInput;
+import org.ayachinene.app.domain.product.creation.SkuInput;
+import org.ayachinene.app.domain.product.creation.SpecificationInput;
+import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 import org.ayachinene.app.exception.ValidationException;
 
 import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,13 +33,26 @@ class ProductsTest {
                 primaryImageFileId,
                 gallery
         );
-        var productCode = new ProductCode(UUID7s.fromStringUnsafe(
-                "018f6b5c-7c00-7000-8000-000000000001"
-        ));
+        var productCode = new ProductCode("PRD_23456789ABCDEFGHJKMN");
 
-        var validatedInput = ProductValidator.validate(input);
-        var first = Products.mkProduct(productCode, validatedInput);
-        var second = Products.mkProduct(productCode, validatedInput);
+        input = new CreateProductInput(
+                input.title(),
+                input.subtitle(),
+                input.description(),
+                input.categoryCode(),
+                input.primaryImageFileId(),
+                input.galleryImageFileIds(),
+                List.of(new SpecificationInput("颜色", List.of("黑色"))),
+                List.of(new SkuInput(
+                        "TSHIRT-BLACK",
+                        new BigDecimal("99.00"),
+                        null,
+                        List.of(new SelectionInput("颜色", "黑色"))
+                ))
+        );
+
+        var first = Products.create(productCode, input).product();
+        var second = Products.create(productCode, input).product();
 
         assertEquals(first, second);
         assertNotSame(first, second);
@@ -67,8 +84,8 @@ class ProductsTest {
         );
     }
 
-    private static FileResourceId fileId(String value) {
-        return new FileResourceId(UUID7s.fromStringUnsafe(value));
+    private static UUID7 fileId(String value) {
+        return UUID7s.fromStringUnsafe(value);
     }
 
 }

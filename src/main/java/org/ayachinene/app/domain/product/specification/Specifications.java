@@ -1,7 +1,7 @@
 package org.ayachinene.app.domain.product.specification;
 
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 
 import java.util.List;
 
@@ -10,28 +10,28 @@ public final class Specifications {
     private Specifications() {
     }
 
-    public static List<Specification> mkSpecifications(
+    public static List<Specification> create(
             List<SpecificationInput> inputs
     ) {
         return inputs.stream()
-                .map(Specifications::mkSpecification)
+                .map(Specifications::createSpecification)
                 .toList();
     }
 
-    private static Specification mkSpecification(SpecificationInput input) {
+    private static Specification createSpecification(SpecificationInput input) {
         return new Specification(
-                new SpecificationId(UUID7s.generate()),
+                UUID7s.generate(),
                 input.name(),
                 SpecificationStatus.ENABLED,
                 input.values().stream()
-                        .map(Specifications::mkSpecificationValue)
+                        .map(Specifications::createSpecificationValue)
                         .toList()
         );
     }
 
-    private static SpecificationValue mkSpecificationValue(String displayName) {
+    private static SpecificationValue createSpecificationValue(String displayName) {
         return new SpecificationValue(
-                new SpecificationValueId(UUID7s.generate()),
+                UUID7s.generate(),
                 displayName,
                 SpecificationStatus.ENABLED
         );

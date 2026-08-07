@@ -1,6 +1,6 @@
 package org.ayachinene.app.domain.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,8 +12,8 @@ public record Product(
         String subtitle,
         String description,
         CategoryCode categoryCode,
-        FileResourceId primaryImageFileId,
-        List<FileResourceId> galleryImageFileIds
+        UUID7 primaryImageFileId,
+        List<UUID7> galleryImageFileIds
 ) {
     public Product {
         Objects.requireNonNull(productCode, "productCode must not be null");

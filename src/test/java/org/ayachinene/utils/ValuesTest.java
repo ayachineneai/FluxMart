@@ -24,5 +24,6 @@ class ValuesTest {
 
         String[] values = null;
         assertFalse(Values.notNull(values));
+        assertTrue(Values.anyNull(values));
     }
 }

@@ -1,6 +1,6 @@
 package org.ayachinene.app.domain.product.creation;
 
-import org.ayachinene.app.domain.file.FileResourceId;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public record SkuInput(
         String merchantSkuCode,
         BigDecimal price,
-        FileResourceId imageFileId,
+        UUID7 imageFileId,
         List<SelectionInput> selections
 ) {
 }

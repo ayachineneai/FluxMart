@@ -4,8 +4,8 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.ayachinene.app.uuid7.UUID7;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.utils.Values;
 
 import java.sql.CallableStatement;

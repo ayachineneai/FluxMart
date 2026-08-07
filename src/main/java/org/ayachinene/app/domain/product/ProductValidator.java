@@ -1,6 +1,6 @@
 package org.ayachinene.app.domain.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
+import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.utils.Lists;
 import org.ayachinene.utils.Validates;
@@ -49,16 +49,16 @@ public final class ProductValidator {
         return Validates.requireNonNull(value, "categoryCode");
     }
 
-    public static FileResourceId fileResourceId(FileResourceId value, String field) {
+    public static UUID7 fileResourceId(UUID7 value, String field) {
         return Validates.requireNonNull(value, field);
     }
 
-    public static List<FileResourceId> galleryImageFileIds(List<FileResourceId> values) {
+    public static List<UUID7> galleryImageFileIds(List<UUID7> values) {
         var normalized = Lists.nullToEmpty(values).stream()
                 .map(value -> fileResourceId(value, "galleryImageFileIds element"))
                 .toList();
-        Validates.requireUnique(
-                normalized,
+        Validates.require(
+                Lists.isUnique(normalized),
                 "galleryImageFileIds must not contain duplicates"
         );
         return normalized;

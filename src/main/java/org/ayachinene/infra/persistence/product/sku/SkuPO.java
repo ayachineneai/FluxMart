@@ -1,10 +1,9 @@
 package org.ayachinene.infra.persistence.product.sku;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.sku.SkuCode;
 import org.ayachinene.app.domain.product.sku.SkuStatus;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +16,7 @@ public class SkuPO {
     private String merchantSkuCode;
     private SkuStatus status;
     private Long priceAmount;
-    private FileResourceId imageFileId;
+    private UUID7 imageFileId;
     private Long version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -76,11 +75,11 @@ public class SkuPO {
         return this;
     }
 
-    public FileResourceId getImageFileId() {
+    public UUID7 getImageFileId() {
         return imageFileId;
     }
 
-    public SkuPO setImageFileId(FileResourceId imageFileId) {
+    public SkuPO setImageFileId(UUID7 imageFileId) {
         this.imageFileId = imageFileId;
         return this;
     }

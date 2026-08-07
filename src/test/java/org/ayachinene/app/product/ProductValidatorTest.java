@@ -1,8 +1,7 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.ProductValidator;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 import org.ayachinene.app.exception.ValidationException;
 
@@ -32,9 +31,9 @@ class ProductValidatorTest {
 
     @Test
     void validatesImageFileIdsAndGalleryConstraints() {
-        var fileId = new FileResourceId(UUID7s.fromStringUnsafe(
+        var fileId = UUID7s.fromStringUnsafe(
                 "018f6b5c-7c00-7000-8000-000000000010"
-        ));
+        );
 
         assertEquals(fileId, ProductValidator.fileResourceId(fileId, "primaryImageFileId"));
         assertThrows(

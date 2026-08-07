@@ -1,8 +1,7 @@
 package org.ayachinene.infra.persistence.product;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.ayachinene.app.domain.file.FileResourceId;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +10,7 @@ public class ProductGalleryImagePO {
 
     private UUID7 id;
     private UUID7 productId;
-    private FileResourceId fileId;
+    private UUID7 fileId;
     private Integer sortOrder;
     private LocalDateTime createdAt;
 
@@ -33,11 +32,11 @@ public class ProductGalleryImagePO {
         return this;
     }
 
-    public FileResourceId getFileId() {
+    public UUID7 getFileId() {
         return fileId;
     }
 
-    public ProductGalleryImagePO setFileId(FileResourceId fileId) {
+    public ProductGalleryImagePO setFileId(UUID7 fileId) {
         this.fileId = fileId;
         return this;
     }

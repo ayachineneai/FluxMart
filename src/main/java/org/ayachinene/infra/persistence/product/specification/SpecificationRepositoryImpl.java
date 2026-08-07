@@ -4,7 +4,7 @@ import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.ProductNotFoundException;
 import org.ayachinene.app.domain.product.specification.Specification;
 import org.ayachinene.app.domain.product.specification.SpecificationRepository;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.infra.persistence.product.ProductMapper;
 import org.ayachinene.infra.persistence.product.converter.SpecificationPersistenceConverter;
 import org.ayachinene.utils.Streams;

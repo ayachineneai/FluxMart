@@ -1,4 +1,7 @@
-package org.ayachinene.app.uuid7;
+package org.ayachinene.shared.uuid7;
+
+import org.ayachinene.app.exception.ValidationException;
+import org.ayachinene.utils.Validates;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,6 +24,15 @@ public final class UUID7 implements Serializable {
 
     static UUID7 of(UUID value) {
         return new UUID7(value);
+    }
+
+    public static UUID7 fromString(String value, String field) {
+        var normalized = Validates.requiredText(value, field);
+        var parsed = UUID7s.fromString(normalized);
+        if (parsed.isLeft()) {
+            throw new ValidationException(field + " must be a UUIDv7");
+        }
+        return parsed.get();
     }
 
     public UUID getValue() {

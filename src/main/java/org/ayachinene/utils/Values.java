@@ -25,9 +25,13 @@ public final class Values {
 
     @SafeVarargs
     public static <T> boolean notNull(T... values) {
-        if (values == null) {
-            return false;
-        }
+        if (values == null) return false;
         return Arrays.stream(values).allMatch(Objects::nonNull);
+    }
+
+    @SafeVarargs
+    public static <T> boolean anyNull(T ...values) {
+        if (values == null) return true;
+        return Arrays.stream(values).anyMatch(Objects::isNull);
     }
 }

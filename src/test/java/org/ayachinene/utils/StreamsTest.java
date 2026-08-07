@@ -22,5 +22,14 @@ class StreamsTest {
     void treatsNullAsAnEmptyStream() {
         assertEquals(0, Streams.withIndex(null).count());
         assertEquals(0, Streams.of((List<Object>) null).count());
+        assertEquals(0, Streams.of((char[]) null).count());
+    }
+
+    @Test
+    void streamsCharactersInArrayOrder() {
+        assertEquals(
+                List.of('A', 'B', 'C'),
+                Streams.of(new char[]{'A', 'B', 'C'}).toList()
+        );
     }
 }

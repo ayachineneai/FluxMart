@@ -1,12 +1,14 @@
 package org.ayachinene.infra.persistence.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.Product;
 import org.ayachinene.app.domain.product.ProductNotFoundException;
 import org.ayachinene.app.domain.product.ProductRepository;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
-import org.ayachinene.app.uuid7.UUID7;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.app.domain.product.creation.ProductCreation;
+import org.ayachinene.app.domain.product.sku.SkuRepository;
+import org.ayachinene.app.domain.product.specification.SpecificationRepository;
+import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.converter.ProductPersistenceConverter;
 import org.ayachinene.utils.Streams;
 import org.springframework.stereotype.Repository;
@@ -21,25 +23,37 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductMapper productMapper;
     private final ProductGalleryImageMapper galleryImageMapper;
+    private final SpecificationRepository specificationRepository;
+    private final SkuRepository skuRepository;
     private final ProductPersistenceConverter persistenceConverter;
 
     public ProductRepositoryImpl(
             ProductMapper productMapper,
             ProductGalleryImageMapper galleryImageMapper,
+            SpecificationRepository specificationRepository,
+            SkuRepository skuRepository,
             ProductPersistenceConverter persistenceConverter
     ) {
         this.productMapper = productMapper;
         this.galleryImageMapper = galleryImageMapper;
+        this.specificationRepository = specificationRepository;
+        this.skuRepository = skuRepository;
         this.persistenceConverter = persistenceConverter;
     }
 
     @Override
-    public void create(Product product) {
+    public void create(ProductCreation creation) {
+        var product = creation.product();
         var newProductId = UUID7s.generate();
         var createdAt = LocalDateTime.now();
 
         insertProduct(product, newProductId, createdAt);
         insertGalleryImages(product.galleryImageFileIds(), newProductId, createdAt);
+        specificationRepository.create(
+                product.productCode(),
+                creation.specifications()
+        );
+        skuRepository.create(product.productCode(), creation.skus());
     }
 
     private void insertProduct(Product product, UUID7 newProductId, LocalDateTime createdAt) {
@@ -53,7 +67,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void insertGalleryImages(
-            List<FileResourceId> galleryImageFileIds,
+            List<UUID7> galleryImageFileIds,
             UUID7 owningProductId,
             LocalDateTime createdAt
     ) {
@@ -107,7 +121,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void replaceGalleryImages(
-            List<FileResourceId> galleryImageFileIds,
+            List<UUID7> galleryImageFileIds,
             UUID7 existingProductId,
             LocalDateTime createdAt
     ) {

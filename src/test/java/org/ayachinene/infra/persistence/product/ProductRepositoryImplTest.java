@@ -1,12 +1,15 @@
 package org.ayachinene.infra.persistence.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.app.domain.product.Product;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.ProductStatus;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.app.domain.product.creation.ProductCreation;
+import org.ayachinene.app.domain.product.sku.SkuRepository;
+import org.ayachinene.app.domain.product.specification.SpecificationRepository;
+import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.converter.ProductPersistenceConverter;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -31,27 +34,31 @@ class ProductRepositoryImplTest {
     void insertsProductAndOrderedGalleryImages() {
         var productMapper = mock(ProductMapper.class);
         var galleryMapper = mock(ProductGalleryImageMapper.class);
+        var specificationRepository = mock(SpecificationRepository.class);
+        var skuRepository = mock(SkuRepository.class);
         when(productMapper.insert(any(ProductPO.class))).thenReturn(1);
         when(galleryMapper.insert(any(ProductGalleryImagePO.class))).thenReturn(1);
 
-        var firstImage = new FileResourceId(UUID7s.generate());
-        var secondImage = new FileResourceId(UUID7s.generate());
+        var firstImage = UUID7s.generate();
+        var secondImage = UUID7s.generate();
         var product = new Product(
-                new ProductCode(UUID7s.generate()),
+                ProductCode.generate(),
                 ProductStatus.DRAFT,
                 "Product",
                 null,
                 "Description",
                 new CategoryCode("CATEGORY"),
-                new FileResourceId(UUID7s.generate()),
+                UUID7s.generate(),
                 List.of(firstImage, secondImage)
         );
 
         new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
+                specificationRepository,
+                skuRepository,
                 Mappers.getMapper(ProductPersistenceConverter.class)
-        ).create(product);
+        ).create(new ProductCreation(product, List.of(), List.of()));
 
         var productCaptor = ArgumentCaptor.forClass(ProductPO.class);
         verify(productMapper).insert(productCaptor.capture());
@@ -69,6 +76,8 @@ class ProductRepositoryImplTest {
         assertEquals(0, savedImages.get(0).getSortOrder());
         assertEquals(secondImage, savedImages.get(1).getFileId());
         assertEquals(1, savedImages.get(1).getSortOrder());
+        verify(specificationRepository).create(product.productCode(), List.of());
+        verify(skuRepository).create(product.productCode(), List.of());
     }
 
     @Test
@@ -82,7 +91,7 @@ class ProductRepositoryImplTest {
                 .thenReturn(1);
         when(galleryMapper.insert(any(ProductGalleryImagePO.class))).thenReturn(1);
 
-        var galleryImage = new FileResourceId(UUID7s.generate());
+        var galleryImage = UUID7s.generate();
         var product = productWithGallery(List.of(galleryImage));
 
         repository(productMapper, galleryMapper).update(product, 3L);
@@ -109,7 +118,7 @@ class ProductRepositoryImplTest {
         when(productMapper.updateByProductCodeAndVersion(any(ProductPO.class), eq(3L)))
                 .thenReturn(0);
 
-        var product = productWithGallery(List.of(new FileResourceId(UUID7s.generate())));
+        var product = productWithGallery(List.of(UUID7s.generate()));
 
         assertThrows(
                 ProductVersionConflictException.class,
@@ -119,15 +128,15 @@ class ProductRepositoryImplTest {
         verify(galleryMapper, never()).insert(any(ProductGalleryImagePO.class));
     }
 
-    private static Product productWithGallery(List<FileResourceId> galleryImages) {
+    private static Product productWithGallery(List<UUID7> galleryImages) {
         return new Product(
-                new ProductCode(UUID7s.generate()),
+                ProductCode.generate(),
                 ProductStatus.DRAFT,
                 "Product",
                 null,
                 "Description",
                 new CategoryCode("CATEGORY"),
-                new FileResourceId(UUID7s.generate()),
+                UUID7s.generate(),
                 galleryImages
         );
     }
@@ -139,6 +148,8 @@ class ProductRepositoryImplTest {
         return new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
+                mock(SpecificationRepository.class),
+                mock(SkuRepository.class),
                 Mappers.getMapper(ProductPersistenceConverter.class)
         );
     }

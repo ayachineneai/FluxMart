@@ -3,7 +3,7 @@ package org.ayachinene.api.product;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.creation.CreateProductInput;
 import org.ayachinene.app.service.product.ProductService;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.api.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -25,14 +25,14 @@ class ProductControllerTest {
     @Test
     void createsProductFromHttpRequest() throws Exception {
         var productService = mock(ProductService.class);
-        var productCode = new ProductCode(UUID7s.generate());
+        var productCode = ProductCode.generate();
         when(productService.createProduct(any())).thenReturn(productCode);
 
         mockMvc(productService).perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.productCode").value(productCode.value().toString()));
+                .andExpect(jsonPath("$.productCode").value(productCode.value()));
 
         var inputCaptor = ArgumentCaptor.forClass(CreateProductInput.class);
         verify(productService).createProduct(inputCaptor.capture());
@@ -62,7 +62,10 @@ class ProductControllerTest {
     }
 
     private static MockMvc mockMvc(ProductService productService) {
-        return standaloneSetup(new ProductController(productService))
+        return standaloneSetup(new ProductController(
+                productService,
+                new ProductApiMapper()
+        ))
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }

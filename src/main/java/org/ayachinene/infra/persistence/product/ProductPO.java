@@ -1,11 +1,10 @@
 package org.ayachinene.infra.persistence.product;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.ProductStatus;
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +20,7 @@ public class ProductPO {
     private String subtitle;
     private String description;
     private CategoryCode categoryCode;
-    private FileResourceId primaryImageFileId;
+    private UUID7 primaryImageFileId;
 
     private Long version;
 
@@ -91,11 +90,11 @@ public class ProductPO {
         return this;
     }
 
-    public FileResourceId getPrimaryImageFileId() {
+    public UUID7 getPrimaryImageFileId() {
         return primaryImageFileId;
     }
 
-    public ProductPO setPrimaryImageFileId(FileResourceId primaryImageFileId) {
+    public ProductPO setPrimaryImageFileId(UUID7 primaryImageFileId) {
         this.primaryImageFileId = primaryImageFileId;
         return this;
     }

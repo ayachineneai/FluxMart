@@ -1,12 +1,16 @@
 package org.ayachinene.app.domain.product.sku;
 
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.app.code.BusinessCodes;
 
-import java.util.Objects;
+public record SkuCode(String value) {
 
-public record SkuCode(UUID7 value) {
+    private static final String PREFIX = "SKU_";
 
     public SkuCode {
-        Objects.requireNonNull(value, "value must not be null");
+        value = BusinessCodes.validate(value, PREFIX, "skuCode");
+    }
+
+    public static SkuCode generate() {
+        return new SkuCode(PREFIX + BusinessCodes.generateBody());
     }
 }

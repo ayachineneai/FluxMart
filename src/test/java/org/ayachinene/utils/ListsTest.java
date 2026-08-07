@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ListsTest {
@@ -23,5 +24,13 @@ class ListsTest {
         assertTrue(Lists.last(null).isEmpty());
         assertTrue(Lists.head(List.of()).isEmpty());
         assertTrue(Lists.last(List.of()).isEmpty());
+    }
+
+    @Test
+    void checksUniqueValuesAndKeys() {
+        assertTrue(Lists.isUnique(List.of("A", "B")));
+        assertFalse(Lists.isUnique(List.of("A", "A")));
+        assertFalse(Lists.isUnique(List.of("A", "a"), String::toLowerCase));
+        assertFalse(Lists.isUnique(null));
     }
 }

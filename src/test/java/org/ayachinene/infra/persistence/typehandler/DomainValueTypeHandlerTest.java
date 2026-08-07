@@ -1,13 +1,9 @@
 package org.ayachinene.infra.persistence.typehandler;
 
 import org.apache.ibatis.type.JdbcType;
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.sku.SkuCode;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
-import org.ayachinene.app.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
@@ -21,31 +17,17 @@ import static org.mockito.Mockito.when;
 class DomainValueTypeHandlerTest {
 
     @Test
-    void mapsProductCodeToBinary() throws Exception {
-        var uuid7 = UUID7s.generate();
-        var productCode = new ProductCode(uuid7);
+    void mapsProductCodeToVarchar() throws Exception {
+        var productCode = new ProductCode("PRD_23456789ABCDEFGHJKMN");
         var statement = mock(PreparedStatement.class);
         var resultSet = mock(ResultSet.class);
         var handler = new ProductCodeTypeHandler();
-        when(resultSet.getBytes("product_code")).thenReturn(UUID7s.toBytes(uuid7));
+        when(resultSet.getString("product_code")).thenReturn(productCode.value());
 
-        handler.setNonNullParameter(statement, 1, productCode, JdbcType.BINARY);
+        handler.setNonNullParameter(statement, 1, productCode, JdbcType.VARCHAR);
 
-        verify(statement).setBytes(1, UUID7s.toBytes(uuid7));
+        verify(statement).setString(1, productCode.value());
         assertEquals(productCode, handler.getNullableResult(resultSet, "product_code"));
-    }
-
-    @Test
-    void mapsFileResourceIdToBinary() throws Exception {
-        var uuid7 = UUID7s.generate();
-        var fileId = new FileResourceId(uuid7);
-        var resultSet = mock(ResultSet.class);
-        when(resultSet.getBytes("file_id")).thenReturn(UUID7s.toBytes(uuid7));
-
-        assertEquals(
-                fileId,
-                new FileResourceIdTypeHandler().getNullableResult(resultSet, "file_id")
-        );
     }
 
     @Test
@@ -63,23 +45,14 @@ class DomainValueTypeHandlerTest {
     }
 
     @Test
-    void mapsSkuAndSpecificationIdentitiesToBinary() throws Exception {
-        var uuid7 = UUID7s.generate();
-        var bytes = UUID7s.toBytes(uuid7);
+    void mapsSkuCodeToVarchar() throws Exception {
+        var skuCode = new SkuCode("SKU_23456789ABCDEFGHJKMN");
         var resultSet = mock(ResultSet.class);
-        when(resultSet.getBytes("value")).thenReturn(bytes);
+        when(resultSet.getString("value")).thenReturn(skuCode.value());
 
         assertEquals(
-                new SkuCode(uuid7),
+                skuCode,
                 new SkuCodeTypeHandler().getNullableResult(resultSet, "value")
-        );
-        assertEquals(
-                new SpecificationId(uuid7),
-                new SpecificationIdTypeHandler().getNullableResult(resultSet, "value")
-        );
-        assertEquals(
-                new SpecificationValueId(uuid7),
-                new SpecificationValueIdTypeHandler().getNullableResult(resultSet, "value")
         );
     }
 

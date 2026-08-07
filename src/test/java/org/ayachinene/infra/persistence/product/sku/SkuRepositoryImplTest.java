@@ -6,9 +6,7 @@ import org.ayachinene.app.domain.product.sku.Sku;
 import org.ayachinene.app.domain.product.sku.SkuCode;
 import org.ayachinene.app.domain.product.sku.SkuStatus;
 import org.ayachinene.app.domain.product.sku.SpecificationSelection;
-import org.ayachinene.app.domain.product.specification.SpecificationId;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.persistence.product.ProductMapper;
 import org.ayachinene.infra.persistence.product.converter.SkuPersistenceConverter;
 import org.junit.jupiter.api.Test;
@@ -32,15 +30,15 @@ class SkuRepositoryImplTest {
         var skuMapper = mock(SkuMapper.class);
         var selectionMapper = mock(SkuSpecificationSelectionMapper.class);
         var productId = UUID7s.generate();
-        var productCode = new ProductCode(UUID7s.generate());
+        var productCode = ProductCode.generate();
         when(productMapper.selectIdByProductCode(productCode)).thenReturn(productId);
 
         var selection = new SpecificationSelection(
-                new SpecificationId(UUID7s.generate()),
-                new SpecificationValueId(UUID7s.generate())
+                UUID7s.generate(),
+                UUID7s.generate()
         );
         var sku = new Sku(
-                new SkuCode(UUID7s.generate()),
+                SkuCode.generate(),
                 "SKU-BLACK",
                 SkuStatus.DISABLED,
                 new Money(new BigDecimal("99.00")),

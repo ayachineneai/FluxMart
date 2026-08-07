@@ -1,4 +1,4 @@
-package org.ayachinene.app.uuid7;
+package org.ayachinene.shared.uuid7;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;

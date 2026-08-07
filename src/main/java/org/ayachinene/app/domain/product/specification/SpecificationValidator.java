@@ -17,9 +17,8 @@ public final class SpecificationValidator {
         var specifications = Lists.nullToEmpty(inputs).stream()
                 .map(SpecificationValidator::validate)
                 .toList();
-        Validates.requireUnique(
-                specifications,
-                SpecificationInput::name,
+        Validates.require(
+                Lists.isUnique(specifications, SpecificationInput::name),
                 "specification names must not be duplicated"
         );
         return specifications;
@@ -47,8 +46,8 @@ public final class SpecificationValidator {
                 !values.isEmpty(),
                 "specification values must not be empty: " + specificationName
         );
-        Validates.requireUnique(
-                values,
+        Validates.require(
+                Lists.isUnique(values),
                 "specification values must not be duplicated: " + specificationName
         );
         return values;

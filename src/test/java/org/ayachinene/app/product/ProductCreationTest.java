@@ -1,6 +1,5 @@
 package org.ayachinene.app.product;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.Products;
@@ -10,7 +9,7 @@ import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
 import org.ayachinene.app.domain.product.sku.SkuStatus;
 import org.ayachinene.app.domain.product.specification.SpecificationStatus;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -22,14 +21,14 @@ class ProductCreationTest {
 
     @Test
     void createsSpecificationsAndResolvesSkuSelections() {
-        var creation = Products.mkProductCreation(
-                new ProductCode(UUID7s.generate()),
+        var creation = Products.create(
+                ProductCode.generate(),
                 new CreateProductInput(
                         "T-Shirt",
                         null,
                         "Cotton",
                         new CategoryCode("TSHIRT"),
-                        new FileResourceId(UUID7s.generate()),
+                        UUID7s.generate(),
                         List.of(),
                         List.of(new SpecificationInput("颜色", List.of("黑色"))),
                         List.of(new SkuInput(

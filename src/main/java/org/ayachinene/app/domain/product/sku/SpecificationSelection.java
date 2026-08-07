@@ -1,13 +1,12 @@
 package org.ayachinene.app.domain.product.sku;
 
-import org.ayachinene.app.domain.product.specification.SpecificationId;
-import org.ayachinene.app.domain.product.specification.SpecificationValueId;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.util.Objects;
 
 public record SpecificationSelection(
-        SpecificationId specificationId,
-        SpecificationValueId specificationValueId
+        UUID7 specificationId,
+        UUID7 specificationValueId
 ) {
 
     public SpecificationSelection {

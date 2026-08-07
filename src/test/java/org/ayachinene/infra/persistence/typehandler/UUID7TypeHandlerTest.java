@@ -1,7 +1,7 @@
 package org.ayachinene.infra.persistence.typehandler;
 
 import org.apache.ibatis.type.JdbcType;
-import org.ayachinene.app.uuid7.UUID7s;
+import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;

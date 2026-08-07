@@ -1,5 +1,7 @@
 package org.ayachinene.api.product;
 
+import org.ayachinene.api.product.data.CreateProductRequest;
+import org.ayachinene.api.product.data.CreateProductResponse;
 import org.ayachinene.app.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,15 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductApiMapper productMapper;
 
-    public ProductController(ProductService productService) {
+    public ProductController(
+            ProductService productService,
+            ProductApiMapper productMapper
+    ) {
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CreateProductResponse createProduct(@RequestBody CreateProductRequest request) {
-        var productCode = productService.createProduct(request.toInput());
-        return new CreateProductResponse(productCode.value().toString());
+        var input = productMapper.toInput(request);
+        var productCode = productService.createProduct(input);
+        return new CreateProductResponse(productCode.value());
     }
 }

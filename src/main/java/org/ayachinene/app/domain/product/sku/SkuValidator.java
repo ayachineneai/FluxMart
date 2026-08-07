@@ -27,16 +27,15 @@ public final class SkuValidator {
                 .map(SkuValidator::validate)
                 .toList();
 
-        Validates.requireUnique(
-                skus.stream()
+        Validates.require(
+                Lists.isUnique(skus.stream()
                         .map(SkuInput::merchantSkuCode)
                         .filter(Objects::nonNull)
-                        .toList(),
+                        .toList()),
                 "merchantSkuCode must not be duplicated"
         );
-        Validates.requireUnique(
-                skus,
-                sku -> configurationOf(sku.selections()),
+        Validates.require(
+                Lists.isUnique(skus, sku -> configurationOf(sku.selections())),
                 "SKU configurations must not be duplicated"
         );
         return skus;
@@ -65,21 +64,16 @@ public final class SkuValidator {
 
     private static BigDecimal price(BigDecimal value) {
         Validates.requireNonNull(value, "price");
-        try {
-            return Values.filter(Money.validate(value), BigDecimals::isPositive)
+        return Values.filter(Money.validate(value), BigDecimals::isPositive)
                 .getOrElseThrow(() -> new ValidationException("price must be positive"));
-        } catch (IllegalArgumentException exception) {
-            throw new ValidationException(exception.getMessage());
-        }
     }
 
     private static List<SelectionInput> selections(List<SelectionInput> inputs) {
         var selections = Lists.nullToEmpty(inputs).stream()
                 .map(SkuValidator::selection)
                 .toList();
-        Validates.requireUnique(
-                selections,
-                SelectionInput::specification,
+        Validates.require(
+                Lists.isUnique(selections, SelectionInput::specification),
                 "SKU must not select the same specification more than once"
         );
         return selections;

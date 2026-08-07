@@ -30,7 +30,10 @@ CREATE TABLE IF NOT EXISTS product
 (
     id                BINARY(16)      COMMENT '主键',
 
-    product_code      BINARY(16)      COMMENT '商品业务编号',
+    product_code      VARCHAR(24)
+                      CHARACTER SET ascii
+                      COLLATE ascii_bin
+                      COMMENT '系统生成的商品业务编号，区分大小写',
 
     status            VARCHAR(20)     COMMENT '草稿-DRAFT、在售-ON_SALE、已下架-OFF_SALE、已归档-ARCHIVED',
     title             VARCHAR(50)     COMMENT '商品标题',
@@ -102,7 +105,10 @@ CREATE TABLE IF NOT EXISTS sku
     id                BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
     product_id        BINARY(16)      COMMENT '所属商品内部主键',
 
-    sku_code          BINARY(16)      COMMENT '系统生成的 SKU 业务编号',
+    sku_code          VARCHAR(24)
+                      CHARACTER SET ascii
+                      COLLATE ascii_bin
+                      COMMENT '系统生成的 SKU 业务编号，区分大小写',
     merchant_sku_code VARCHAR(64)
                       CHARACTER SET utf8mb4
                       COLLATE utf8mb4_bin

@@ -1,9 +1,11 @@
 package org.ayachinene.app.domain.product.specification;
 
+import org.ayachinene.shared.uuid7.UUID7;
+
 import java.util.Objects;
 
 public record SpecificationValue(
-        SpecificationValueId specificationValueId,
+        UUID7 specificationValueId,
         String displayName,
         SpecificationStatus status
 ) {

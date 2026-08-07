@@ -1,7 +1,8 @@
 package org.ayachinene.app.domain.product.sku;
 
-import org.ayachinene.app.domain.file.FileResourceId;
 import org.ayachinene.app.domain.money.Money;
+import org.ayachinene.app.exception.ValidationException;
+import org.ayachinene.shared.uuid7.UUID7;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,7 +12,7 @@ public record Sku(
         String merchantSkuCode,
         SkuStatus status,
         Money price,
-        FileResourceId imageFileId,
+        UUID7 imageFileId,
         List<SpecificationSelection> specificationSelections
 ) {
 
@@ -34,7 +35,7 @@ public record Sku(
                 .distinct()
                 .count();
         if (uniqueSpecificationCount != specificationSelections.size()) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "specificationSelections must not contain duplicate specifications"
             );
         }

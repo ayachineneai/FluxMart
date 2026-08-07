@@ -1,11 +1,16 @@
 package org.ayachinene.app.domain.product;
 
-import org.ayachinene.app.uuid7.UUID7;
+import org.ayachinene.app.code.BusinessCodes;
 
-import java.util.Objects;
+public record ProductCode(String value) {
 
-public record ProductCode(UUID7 value) {
+    private static final String PREFIX = "PRD_";
+
     public ProductCode {
-        Objects.requireNonNull(value, "value must not be null");
+        value = BusinessCodes.validate(value, PREFIX, "productCode");
+    }
+
+    public static ProductCode generate() {
+        return new ProductCode(PREFIX + BusinessCodes.generateBody());
     }
 }
