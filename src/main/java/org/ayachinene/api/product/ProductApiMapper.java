@@ -1,10 +1,16 @@
 package org.ayachinene.api.product;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
+import org.ayachinene.api.product.data.PublishProductRequest;
+import org.ayachinene.api.product.data.PublishProductResponse;
 import org.ayachinene.app.domain.product.CategoryCode;
+import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.creation.*;
+import org.ayachinene.app.domain.product.publication.PublishProductInput;
+import org.ayachinene.app.domain.product.publication.PublishProductResult;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.utils.Streams;
+import org.ayachinene.utils.Validates;
 import org.ayachinene.utils.Values;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +24,24 @@ public class ProductApiMapper {
             product(request),
             specifications(request.specifications()),
             skus(request.skus())
+        );
+    }
+
+    public PublishProductInput toInput(
+        String productCode,
+        PublishProductRequest request
+    ) {
+        return new PublishProductInput(
+            new ProductCode(productCode),
+            Validates.requireNonNull(request.expectedVersion(), "expectedVersion")
+        );
+    }
+
+    public PublishProductResponse toResponse(PublishProductResult result) {
+        return new PublishProductResponse(
+            result.productCode().value(),
+            result.status().name(),
+            result.version()
         );
     }
 

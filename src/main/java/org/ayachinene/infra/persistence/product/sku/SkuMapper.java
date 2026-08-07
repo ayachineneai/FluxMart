@@ -2,6 +2,7 @@ package org.ayachinene.infra.persistence.product.sku;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.ayachinene.app.domain.product.ProductCode;
 
 import java.util.List;
 
@@ -9,4 +10,6 @@ import java.util.List;
 public interface SkuMapper extends BaseMapper<SkuPO> {
 
     int insertBatch(List<SkuPO> skus);
+
+    boolean existsByProductCode(ProductCode productCode);
 }

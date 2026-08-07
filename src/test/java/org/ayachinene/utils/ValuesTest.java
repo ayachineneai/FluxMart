@@ -2,6 +2,8 @@ package org.ayachinene.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -25,5 +27,13 @@ class ValuesTest {
         String[] values = null;
         assertFalse(Values.notNull(values));
         assertTrue(Values.anyNull(values));
+    }
+
+    @Test
+    void checksWhetherAValueIsOutsideASet() {
+        var values = Set.of("a", "b");
+
+        assertFalse(Values.notIn(values, "a"));
+        assertTrue(Values.notIn(values, "c"));
     }
 }

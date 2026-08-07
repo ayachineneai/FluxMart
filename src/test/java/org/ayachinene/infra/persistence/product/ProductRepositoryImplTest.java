@@ -3,9 +3,11 @@ package org.ayachinene.infra.persistence.product;
 import org.ayachinene.app.domain.product.CategoryCode;
 import org.ayachinene.app.domain.product.Product;
 import org.ayachinene.app.domain.product.ProductCode;
+import org.ayachinene.app.domain.product.ProductNotFoundException;
 import org.ayachinene.app.domain.product.ProductStatus;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
 import org.ayachinene.app.domain.product.creation.ProductCreation;
+import org.ayachinene.app.domain.product.publication.ProductPublication;
 import org.ayachinene.infra.persistence.product.sku.SkuWriter;
 import org.ayachinene.infra.persistence.product.specification.SpecificationWriter;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -136,6 +139,77 @@ class ProductRepositoryImplTest {
         );
         verify(galleryMapper, never()).deleteByProductId(any());
         verify(galleryMapper, never()).insertBatch(any());
+    }
+
+    @Test
+    void publishesProductByVersionAndReturnsTheNewVersion() {
+        var productMapper = mock(ProductMapper.class);
+        var productCode = ProductCode.generate();
+        when(productMapper.updateStatusByProductCodeAndVersion(
+                eq(productCode),
+                eq(ProductStatus.ON_SALE),
+                eq(3L),
+                any(LocalDateTime.class)
+        )).thenReturn(1);
+
+        var version = repository(productMapper, mock(ProductGalleryImageMapper.class))
+                .publish(
+                        new ProductPublication(productCode, ProductStatus.ON_SALE),
+                        3L
+                );
+
+        assertEquals(4L, version);
+    }
+
+    @Test
+    void rejectsPublishingWhenVersionConflicts() {
+        var productMapper = mock(ProductMapper.class);
+        var productCode = ProductCode.generate();
+        when(productMapper.updateStatusByProductCodeAndVersion(
+                eq(productCode),
+                eq(ProductStatus.ON_SALE),
+                eq(3L),
+                any(LocalDateTime.class)
+        )).thenReturn(0);
+
+        assertThrows(
+                ProductVersionConflictException.class,
+                () -> repository(productMapper, mock(ProductGalleryImageMapper.class))
+                        .publish(
+                                new ProductPublication(productCode, ProductStatus.ON_SALE),
+                                3L
+                        )
+        );
+    }
+
+    @Test
+    void findsTheCurrentPublicationState() {
+        var productMapper = mock(ProductMapper.class);
+        var productCode = ProductCode.generate();
+        when(productMapper.selectPublicationStateByProductCode(productCode))
+                .thenReturn(new ProductPO()
+                        .setProductCode(productCode)
+                        .setStatus(ProductStatus.OFF_SALE)
+                        .setVersion(3L));
+
+        var state = repository(productMapper, mock(ProductGalleryImageMapper.class))
+                .findPublicationState(productCode);
+
+        assertEquals(productCode, state.productCode());
+        assertEquals(ProductStatus.OFF_SALE, state.status());
+        assertEquals(3L, state.version());
+    }
+
+    @Test
+    void rejectsFindingPublicationStateForUnknownProduct() {
+        var productMapper = mock(ProductMapper.class);
+        var productCode = ProductCode.generate();
+
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> repository(productMapper, mock(ProductGalleryImageMapper.class))
+                        .findPublicationState(productCode)
+        );
     }
 
     private static Product productWithGallery(List<UUID7> galleryImages) {

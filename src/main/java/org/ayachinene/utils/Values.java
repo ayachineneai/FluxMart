@@ -4,6 +4,7 @@ import io.vavr.control.Option;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 public final class Values {
@@ -21,6 +22,10 @@ public final class Values {
 
     public static <T> Option<T> filter(T value, Function<T, Boolean> predicate) {
         return Option.of(value).filter(predicate::apply);
+    }
+
+    public static <T> boolean notIn(Set<? extends T> values, T value) {
+        return values == null || !values.contains(value);
     }
 
     @SafeVarargs

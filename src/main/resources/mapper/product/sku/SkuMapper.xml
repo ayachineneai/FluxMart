@@ -35,4 +35,15 @@
         </foreach>
     </insert>
 
+    <select id="existsByProductCode" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM sku
+            INNER JOIN product
+                ON product.id = sku.product_id
+            WHERE product.product_code = #{productCode}
+            LIMIT 1
+        )
+    </select>
+
 </mapper>

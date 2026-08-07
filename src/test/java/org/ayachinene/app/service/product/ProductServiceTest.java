@@ -9,6 +9,7 @@ import org.ayachinene.app.domain.product.creation.ProductInput;
 import org.ayachinene.app.domain.product.creation.SelectionInput;
 import org.ayachinene.app.domain.product.creation.SkuInput;
 import org.ayachinene.app.domain.product.creation.SpecificationInput;
+import org.ayachinene.app.domain.product.sku.SkuRepository;
 import org.ayachinene.app.exception.ValidationException;
 import org.ayachinene.app.service.Tx;
 import org.ayachinene.shared.uuid7.UUID7s;
@@ -36,6 +37,7 @@ class ProductServiceTest {
         }).when(transactionRunner).run(org.mockito.ArgumentMatchers.any(Runnable.class));
         var service = new ProductService(
                 productRepository,
+                mock(SkuRepository.class),
                 transactionRunner
         );
 
@@ -70,9 +72,11 @@ class ProductServiceTest {
     @Test
     void validatesSpecificationsAndSkusBeforeStartingTheTransaction() {
         var productRepository = mock(ProductRepository.class);
+        var skuRepository = mock(SkuRepository.class);
         var transactionRunner = mock(Tx.class);
         var service = new ProductService(
                 productRepository,
+                skuRepository,
                 transactionRunner
         );
 
@@ -97,6 +101,7 @@ class ProductServiceTest {
         assertThrows(ValidationException.class, () -> service.createProduct(input));
         org.mockito.Mockito.verifyNoInteractions(
                 productRepository,
+                skuRepository,
                 transactionRunner
         );
     }
@@ -111,6 +116,7 @@ class ProductServiceTest {
         }).when(transactionRunner).run(org.mockito.ArgumentMatchers.any(Runnable.class));
         var service = new ProductService(
                 productRepository,
+                mock(SkuRepository.class),
                 transactionRunner
         );
 

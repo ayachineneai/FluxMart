@@ -1,10 +1,13 @@
 package org.ayachinene.infra.persistence.product;
 
 import org.ayachinene.app.domain.product.Product;
+import org.ayachinene.app.domain.product.ProductCode;
 import org.ayachinene.app.domain.product.ProductNotFoundException;
 import org.ayachinene.app.domain.product.ProductRepository;
 import org.ayachinene.app.domain.product.ProductVersionConflictException;
 import org.ayachinene.app.domain.product.creation.ProductCreation;
+import org.ayachinene.app.domain.product.publication.ProductPublication;
+import org.ayachinene.app.domain.product.publication.ProductPublicationState;
 import org.ayachinene.infra.persistence.product.sku.SkuWriter;
 import org.ayachinene.infra.persistence.product.specification.SpecificationWriter;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -131,5 +134,43 @@ public class ProductRepositoryImpl implements ProductRepository {
     ) {
         galleryImageMapper.deleteByProductId(existingProductId);
         insertGalleryImages(existingProductId, galleryImageFileIds, createdAt);
+    }
+
+    @Override
+    public ProductPublicationState findPublicationState(
+        ProductCode productCode
+    ) {
+        var product = productMapper.selectPublicationStateByProductCode(
+            productCode
+        );
+        if (product == null) {
+            throw new ProductNotFoundException(productCode);
+        }
+        return new ProductPublicationState(
+            product.getProductCode(),
+            product.getStatus(),
+            product.getVersion()
+        );
+    }
+
+    @Override
+    public long publish(
+        ProductPublication publication,
+        long expectedVersion
+    ) {
+        var updatedAt = LocalDateTime.now();
+        var affectedRows = productMapper.updateStatusByProductCodeAndVersion(
+            publication.productCode(),
+            publication.status(),
+            expectedVersion,
+            updatedAt
+        );
+        if (affectedRows == 0) {
+            throw new ProductVersionConflictException(
+                publication.productCode(),
+                expectedVersion
+            );
+        }
+        return expectedVersion + 1;
     }
 }
