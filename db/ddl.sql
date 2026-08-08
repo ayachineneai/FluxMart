@@ -16,13 +16,16 @@ CREATE TABLE IF NOT EXISTS file_resource
     original_name VARCHAR(255)  COMMENT '上传时的原始文件名',
     content_type  VARCHAR(128)  COMMENT '文件 MIME 类型',
     size          BIGINT UNSIGNED COMMENT '文件大小，单位字节',
+    purpose       VARCHAR(30)   COMMENT '文件用途：商品图片-PRODUCT_IMAGE',
     status        VARCHAR(20)   COMMENT '上传中-UPLOADING、可用-AVAILABLE、已删除-DELETED',
+    upload_expires_at DATETIME(3) COMMENT '上传凭证过期时间',
 
     created_at    DATETIME(3)   COMMENT '创建时间',
     updated_at    DATETIME(3)   COMMENT '最后修改时间',
 
     PRIMARY KEY (id),
-    UNIQUE KEY uk_object_key (object_key)
+    UNIQUE KEY uk_object_key (object_key),
+    KEY idx_status_upload_expires_at (status, upload_expires_at)
 ) COMMENT = '文件资源';
 
 DROP TABLE IF EXISTS product;
