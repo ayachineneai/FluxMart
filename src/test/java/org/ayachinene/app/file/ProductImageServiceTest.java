@@ -1,9 +1,9 @@
 package org.ayachinene.app.file;
 
 import org.ayachinene.app.file.domain.FilePurpose;
+import org.ayachinene.app.file.domain.NewFileResource;
 import org.ayachinene.app.file.productimage.PrepareProductImageUploadInput;
 import org.ayachinene.app.file.productimage.ProductImageService;
-import org.ayachinene.app.file.upload.FileUploadDefinition;
 import org.ayachinene.app.file.upload.FileUploadService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -25,15 +25,15 @@ class ProductImageServiceTest {
                 1024L
         ));
 
-        var definitionCaptor = ArgumentCaptor.forClass(
-                FileUploadDefinition.class
+        var newFileCaptor = ArgumentCaptor.forClass(
+                NewFileResource.class
         );
-        verify(fileUploadService).prepareUpload(definitionCaptor.capture());
-        var definition = definitionCaptor.getValue();
-        assertEquals("product-images/", definition.objectKeyPrefix());
-        assertEquals("black-shirt.png", definition.originalFilename());
-        assertEquals("image/png", definition.contentType());
-        assertEquals(1024L, definition.sizeInBytes());
-        assertEquals(FilePurpose.PRODUCT_IMAGE, definition.purpose());
+        verify(fileUploadService).prepareUpload(newFileCaptor.capture());
+        var newFile = newFileCaptor.getValue();
+        assertEquals("product-images/", newFile.objectKeyPrefix());
+        assertEquals("black-shirt.png", newFile.originalFilename());
+        assertEquals("image/png", newFile.contentType());
+        assertEquals(1024L, newFile.sizeInBytes());
+        assertEquals(FilePurpose.PRODUCT_IMAGE, newFile.purpose());
     }
 }

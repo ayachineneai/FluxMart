@@ -1,7 +1,7 @@
 package org.ayachinene.app.file.productimage;
 
 import org.ayachinene.app.file.domain.FilePurpose;
-import org.ayachinene.app.file.upload.FileUploadDefinition;
+import org.ayachinene.app.file.domain.NewFileResource;
 
 public final class ProductImages {
 
@@ -10,11 +10,11 @@ public final class ProductImages {
     private ProductImages() {
     }
 
-    public static FileUploadDefinition defineUpload(
+    public static NewFileResource defineUpload(
             PrepareProductImageUploadInput input
     ) {
         var validatedInput = ProductImageValidator.validate(input);
-        return new FileUploadDefinition(
+        return new NewFileResource(
                 OBJECT_KEY_PREFIX,
                 validatedInput.filename(),
                 validatedInput.contentType(),

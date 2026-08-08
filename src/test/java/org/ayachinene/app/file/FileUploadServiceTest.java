@@ -3,12 +3,13 @@ package org.ayachinene.app.file;
 import org.ayachinene.app.file.domain.FilePurpose;
 import org.ayachinene.app.file.domain.FileResource;
 import org.ayachinene.app.file.domain.FileStatus;
+import org.ayachinene.app.file.domain.FileUploadCannotBeConfirmedException;
+import org.ayachinene.app.file.domain.NewFileResource;
 import org.ayachinene.app.file.repository.FileResourceRepository;
 import org.ayachinene.app.file.storage.ObjectStorage;
 import org.ayachinene.app.file.storage.StoredObject;
 import org.ayachinene.app.file.storage.UploadAuthorization;
 import org.ayachinene.app.file.storage.UploadFormFields;
-import org.ayachinene.app.file.upload.FileUploadDefinition;
 import org.ayachinene.app.file.upload.FileUploadService;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,7 +38,7 @@ class FileUploadServiceTest {
                 .thenReturn(authorization);
         var service = new FileUploadService(fileRepository, objectStorage);
 
-        var result = service.prepareUpload(new FileUploadDefinition(
+        var result = service.prepareUpload(new NewFileResource(
                 "product-images/",
                 "black-shirt.png",
                 "image/png",
@@ -99,6 +101,24 @@ class FileUploadServiceTest {
         var result = service.confirmUpload(fileId);
 
         assertEquals(FileStatus.AVAILABLE, result.status());
+        verifyNoInteractions(objectStorage);
+        verify(fileRepository, never()).updateStatus(any(), any(), any());
+    }
+
+    @Test
+    void rejectsDeletedFileBeforeAccessingObjectStorage() {
+        var fileRepository = mock(FileResourceRepository.class);
+        var objectStorage = mock(ObjectStorage.class);
+        var fileId = UUID7s.generate();
+        when(fileRepository.find(fileId))
+                .thenReturn(file(fileId, FileStatus.DELETED));
+        var service = new FileUploadService(fileRepository, objectStorage);
+
+        assertThrows(
+                FileUploadCannotBeConfirmedException.class,
+                () -> service.confirmUpload(fileId)
+        );
+
         verifyNoInteractions(objectStorage);
         verify(fileRepository, never()).updateStatus(any(), any(), any());
     }

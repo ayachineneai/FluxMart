@@ -1,8 +1,6 @@
-package org.ayachinene.app.file.upload;
+package org.ayachinene.app.file.domain;
 
-import org.ayachinene.app.file.domain.FilePurpose;
-
-public record FileUploadDefinition(
+public record NewFileResource(
         String objectKeyPrefix,
         String originalFilename,
         String contentType,

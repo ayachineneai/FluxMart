@@ -3,6 +3,7 @@ package org.ayachinene.app.file.upload;
 import org.ayachinene.app.file.domain.Files;
 import org.ayachinene.app.file.domain.FileStatus;
 import org.ayachinene.app.file.domain.FileUploadCannotBeConfirmedException;
+import org.ayachinene.app.file.domain.NewFileResource;
 import org.ayachinene.app.file.repository.FileResourceRepository;
 import org.ayachinene.app.file.storage.ObjectStorage;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -26,8 +27,8 @@ public class FileUploadService {
         this.objectStorage = objectStorage;
     }
 
-    public PreparedFileUpload prepareUpload(FileUploadDefinition definition) {
-        var file = Files.create(definition);
+    public PreparedFileUpload prepareUpload(NewFileResource newFile) {
+        var file = Files.create(newFile);
         var expiresAt = OffsetDateTime.now()
                 .plusMinutes(UPLOAD_AUTHORIZATION_MINUTES);
         var authorization = objectStorage.authorizeUpload(
@@ -52,6 +53,7 @@ public class FileUploadService {
         if (file.status() == FileStatus.AVAILABLE) {
             return confirmedUpload(fileId);
         }
+        Files.requireUploadCanBeConfirmed(file);
 
         var storedObject = objectStorage.find(file.objectKey())
                 .orElseThrow(() -> new FileUploadCannotBeConfirmedException(

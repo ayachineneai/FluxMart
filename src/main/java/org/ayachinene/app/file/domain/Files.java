@@ -1,7 +1,6 @@
 package org.ayachinene.app.file.domain;
 
 import org.ayachinene.app.file.storage.StoredObject;
-import org.ayachinene.app.file.upload.FileUploadDefinition;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 
@@ -10,15 +9,15 @@ public final class Files {
     private Files() {
     }
 
-    public static FileResource create(FileUploadDefinition definition) {
+    public static FileResource create(NewFileResource newFile) {
         var fileId = UUID7s.generate();
         return new FileResource(
                 fileId,
-                objectKey(definition.objectKeyPrefix(), fileId),
-                definition.originalFilename(),
-                definition.contentType(),
-                definition.sizeInBytes(),
-                definition.purpose(),
+                objectKey(newFile.objectKeyPrefix(), fileId),
+                newFile.originalFilename(),
+                newFile.contentType(),
+                newFile.sizeInBytes(),
+                newFile.purpose(),
                 FileStatus.UPLOADING
         );
     }
@@ -31,9 +30,7 @@ public final class Files {
             FileResource file,
             StoredObject storedObject
     ) {
-        if (file.status() != FileStatus.UPLOADING) {
-            throw cannotConfirm(file, "status must be UPLOADING");
-        }
+        requireUploadCanBeConfirmed(file);
         if (file.sizeInBytes() != storedObject.sizeInBytes()) {
             throw cannotConfirm(file, "uploaded object size does not match");
         }
@@ -49,6 +46,12 @@ public final class Files {
                 file.purpose(),
                 FileStatus.AVAILABLE
         );
+    }
+
+    public static void requireUploadCanBeConfirmed(FileResource file) {
+        if (file.status() != FileStatus.UPLOADING) {
+            throw cannotConfirm(file, "status must be UPLOADING");
+        }
     }
 
     private static FileUploadCannotBeConfirmedException cannotConfirm(
