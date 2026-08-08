@@ -4,7 +4,8 @@ import org.ayachinene.api.file.FileApiMapper;
 import org.ayachinene.api.file.data.PrepareProductImageUploadRequest;
 import org.ayachinene.api.file.data.PrepareProductImageUploadResponse;
 import org.ayachinene.api.file.data.ConfirmFileUploadResponse;
-import org.ayachinene.app.file.FileService;
+import org.ayachinene.app.file.productimage.ProductImageService;
+import org.ayachinene.app.file.upload.FileUploadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,14 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/files")
 public class FileController {
 
-    private final FileService fileService;
+    private final ProductImageService productImageService;
+    private final FileUploadService fileUploadService;
     private final FileApiMapper fileMapper;
 
     public FileController(
-            FileService fileService,
+            ProductImageService productImageService,
+            FileUploadService fileUploadService,
             FileApiMapper fileMapper
     ) {
-        this.fileService = fileService;
+        this.productImageService = productImageService;
+        this.fileUploadService = fileUploadService;
         this.fileMapper = fileMapper;
     }
 
@@ -34,7 +38,7 @@ public class FileController {
             @RequestBody PrepareProductImageUploadRequest request
     ) {
         var input = fileMapper.toInput(request);
-        var result = fileService.prepareProductImageUpload(input);
+        var result = productImageService.prepareUpload(input);
         return fileMapper.toResponse(result);
     }
 
@@ -42,7 +46,7 @@ public class FileController {
     public ConfirmFileUploadResponse confirmProductImageUpload(
             @PathVariable String fileId
     ) {
-        var result = fileService.confirmProductImageUpload(
+        var result = fileUploadService.confirmUpload(
                 fileMapper.toFileId(fileId)
         );
         return fileMapper.toResponse(result);

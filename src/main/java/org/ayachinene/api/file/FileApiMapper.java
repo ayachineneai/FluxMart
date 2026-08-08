@@ -3,8 +3,8 @@ package org.ayachinene.api.file;
 import org.ayachinene.api.file.data.PrepareProductImageUploadRequest;
 import org.ayachinene.api.file.data.PrepareProductImageUploadResponse;
 import org.ayachinene.api.file.data.ConfirmFileUploadResponse;
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
-import org.ayachinene.app.file.upload.PreparedProductImageUpload;
+import org.ayachinene.app.file.productimage.PrepareProductImageUploadInput;
+import org.ayachinene.app.file.upload.PreparedFileUpload;
 import org.ayachinene.app.file.storage.UploadAuthorization;
 import org.ayachinene.app.file.upload.ConfirmedFileUpload;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -24,7 +24,7 @@ public class FileApiMapper {
     }
 
     public PrepareProductImageUploadResponse toResponse(
-            PreparedProductImageUpload result
+            PreparedFileUpload result
     ) {
         return new PrepareProductImageUploadResponse(
                 result.fileId().toString(),

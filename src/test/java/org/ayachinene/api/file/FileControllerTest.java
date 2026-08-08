@@ -1,12 +1,13 @@
 package org.ayachinene.api.file;
 
 import org.ayachinene.api.file.controller.FileController;
-import org.ayachinene.app.file.FileService;
+import org.ayachinene.app.file.productimage.ProductImageService;
+import org.ayachinene.app.file.upload.FileUploadService;
 import org.ayachinene.app.file.domain.FileStatus;
 import org.ayachinene.app.file.storage.UploadAuthorization;
 import org.ayachinene.app.file.storage.UploadFormFields;
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
-import org.ayachinene.app.file.upload.PreparedProductImageUpload;
+import org.ayachinene.app.file.productimage.PrepareProductImageUploadInput;
+import org.ayachinene.app.file.upload.PreparedFileUpload;
 import org.ayachinene.app.file.upload.ConfirmedFileUpload;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,12 @@ class FileControllerTest {
 
     @Test
     void preparesProductImageUploadFromHttpRequest() throws Exception {
-        var fileService = mock(FileService.class);
+        var productImageService = mock(ProductImageService.class);
+        var fileUploadService = mock(FileUploadService.class);
         var fileId = UUID7s.generate();
         var expiresAt = OffsetDateTime.parse("2026-08-08T12:05:00+08:00");
-        when(fileService.prepareProductImageUpload(any()))
-                .thenReturn(new PreparedProductImageUpload(
+        when(productImageService.prepareUpload(any()))
+                .thenReturn(new PreparedFileUpload(
                         fileId,
                         FileStatus.UPLOADING,
                         new UploadAuthorization(
@@ -53,7 +55,11 @@ class FileControllerTest {
                         expiresAt
                 ));
 
-        standaloneSetup(new FileController(fileService, new FileApiMapper()))
+        standaloneSetup(new FileController(
+                productImageService,
+                fileUploadService,
+                new FileApiMapper()
+        ))
                 .build()
                 .perform(post("/api/files/product-images/upload-sessions")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +83,7 @@ class FileControllerTest {
         var inputCaptor = ArgumentCaptor.forClass(
                 PrepareProductImageUploadInput.class
         );
-        verify(fileService).prepareProductImageUpload(inputCaptor.capture());
+        verify(productImageService).prepareUpload(inputCaptor.capture());
         assertEquals("black-shirt.png", inputCaptor.getValue().filename());
         assertEquals("image/png", inputCaptor.getValue().contentType());
         assertEquals(183421L, inputCaptor.getValue().sizeInBytes());
@@ -85,21 +91,26 @@ class FileControllerTest {
 
     @Test
     void confirmsProductImageUploadFromPathVariable() throws Exception {
-        var fileService = mock(FileService.class);
+        var productImageService = mock(ProductImageService.class);
+        var fileUploadService = mock(FileUploadService.class);
         var fileId = UUID7s.generate();
-        when(fileService.confirmProductImageUpload(fileId))
+        when(fileUploadService.confirmUpload(fileId))
                 .thenReturn(new ConfirmedFileUpload(
                         fileId,
                         FileStatus.AVAILABLE
                 ));
 
-        standaloneSetup(new FileController(fileService, new FileApiMapper()))
+        standaloneSetup(new FileController(
+                productImageService,
+                fileUploadService,
+                new FileApiMapper()
+        ))
                 .build()
                 .perform(post("/api/files/{fileId}/complete", fileId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(fileId.toString()))
                 .andExpect(jsonPath("$.status").value("AVAILABLE"));
 
-        verify(fileService).confirmProductImageUpload(fileId);
+        verify(fileUploadService).confirmUpload(fileId);
     }
 }

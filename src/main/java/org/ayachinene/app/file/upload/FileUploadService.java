@@ -1,27 +1,24 @@
-package org.ayachinene.app.file;
+package org.ayachinene.app.file.upload;
 
 import org.ayachinene.app.file.domain.Files;
 import org.ayachinene.app.file.domain.FileStatus;
 import org.ayachinene.app.file.domain.FileUploadCannotBeConfirmedException;
 import org.ayachinene.app.file.repository.FileResourceRepository;
 import org.ayachinene.app.file.storage.ObjectStorage;
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
-import org.ayachinene.app.file.upload.PreparedProductImageUpload;
-import org.ayachinene.app.file.upload.ConfirmedFileUpload;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 
 @Service
-public class FileService {
+public class FileUploadService {
 
     private static final long UPLOAD_AUTHORIZATION_MINUTES = 5L;
 
     private final FileResourceRepository fileRepository;
     private final ObjectStorage objectStorage;
 
-    public FileService(
+    public FileUploadService(
             FileResourceRepository fileRepository,
             ObjectStorage objectStorage
     ) {
@@ -29,10 +26,8 @@ public class FileService {
         this.objectStorage = objectStorage;
     }
 
-    public PreparedProductImageUpload prepareProductImageUpload(
-            PrepareProductImageUploadInput input
-    ) {
-        var file = Files.createProductImageResource(input);
+    public PreparedFileUpload prepareUpload(FileUploadDefinition definition) {
+        var file = Files.create(definition);
         var expiresAt = OffsetDateTime.now()
                 .plusMinutes(UPLOAD_AUTHORIZATION_MINUTES);
         var authorization = objectStorage.authorizeUpload(
@@ -44,7 +39,7 @@ public class FileService {
 
         fileRepository.create(file, expiresAt);
 
-        return new PreparedProductImageUpload(
+        return new PreparedFileUpload(
                 file.fileId(),
                 file.status(),
                 authorization,
@@ -52,7 +47,7 @@ public class FileService {
         );
     }
 
-    public ConfirmedFileUpload zconfirmProductImageUpload(UUID7 fileId) {
+    public ConfirmedFileUpload confirmUpload(UUID7 fileId) {
         var file = fileRepository.find(fileId);
         if (file.status() == FileStatus.AVAILABLE) {
             return confirmedUpload(fileId);

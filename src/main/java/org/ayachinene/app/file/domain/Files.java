@@ -1,35 +1,30 @@
 package org.ayachinene.app.file.domain;
 
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
 import org.ayachinene.app.file.storage.StoredObject;
+import org.ayachinene.app.file.upload.FileUploadDefinition;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 
 public final class Files {
 
-    private static final String PRODUCT_IMAGE_PREFIX = "product-images/";
-
     private Files() {
     }
 
-    public static FileResource createProductImageResource(
-            PrepareProductImageUploadInput input
-    ) {
-        var validatedInput = FileValidator.productImage(input);
+    public static FileResource create(FileUploadDefinition definition) {
         var fileId = UUID7s.generate();
         return new FileResource(
                 fileId,
-                productImageObjectKey(fileId),
-                validatedInput.filename(),
-                validatedInput.contentType(),
-                validatedInput.sizeInBytes(),
-                FilePurpose.PRODUCT_IMAGE,
+                objectKey(definition.objectKeyPrefix(), fileId),
+                definition.originalFilename(),
+                definition.contentType(),
+                definition.sizeInBytes(),
+                definition.purpose(),
                 FileStatus.UPLOADING
         );
     }
 
-    private static String productImageObjectKey(UUID7 fileId) {
-        return PRODUCT_IMAGE_PREFIX + fileId;
+    private static String objectKey(String prefix, UUID7 fileId) {
+        return prefix + fileId;
     }
 
     public static FileResource confirmUpload(

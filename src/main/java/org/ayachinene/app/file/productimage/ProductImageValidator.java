@@ -1,33 +1,31 @@
-package org.ayachinene.app.file.domain;
+package org.ayachinene.app.file.productimage;
 
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
 import org.ayachinene.utils.Strings;
 import org.ayachinene.utils.Validates;
 
 import java.util.Locale;
 import java.util.Set;
 
-public final class FileValidator {
+public final class ProductImageValidator {
 
     private static final int MAX_FILENAME_LENGTH = 255;
-    private static final long MAX_PRODUCT_IMAGE_SIZE_IN_BYTES =
-            10L * 1024 * 1024;
-    private static final Set<String> PRODUCT_IMAGE_CONTENT_TYPES = Set.of(
+    private static final long MAX_SIZE_IN_BYTES = 10L * 1024 * 1024;
+    private static final Set<String> CONTENT_TYPES = Set.of(
             "image/jpeg",
             "image/png",
             "image/webp"
     );
 
-    private FileValidator() {
+    private ProductImageValidator() {
     }
 
-    public static PrepareProductImageUploadInput productImage(
+    public static PrepareProductImageUploadInput validate(
             PrepareProductImageUploadInput input
     ) {
         return new PrepareProductImageUploadInput(
                 filename(input.filename()),
-                productImageContentType(input.contentType()),
-                productImageSize(input.sizeInBytes())
+                contentType(input.contentType()),
+                size(input.sizeInBytes())
         );
     }
 
@@ -48,21 +46,21 @@ public final class FileValidator {
         return filename;
     }
 
-    private static String productImageContentType(String value) {
+    private static String contentType(String value) {
         var contentType = Validates.requiredText(value, "contentType")
                 .toLowerCase(Locale.ROOT);
         Validates.require(
-                PRODUCT_IMAGE_CONTENT_TYPES.contains(contentType),
+                CONTENT_TYPES.contains(contentType),
                 "contentType must be image/jpeg, image/png, or image/webp"
         );
         return contentType;
     }
 
-    private static long productImageSize(Long value) {
+    private static long size(Long value) {
         long size = Validates.requireNonNull(value, "sizeInBytes");
         Validates.require(size > 0, "sizeInBytes must be greater than zero");
         Validates.require(
-                size <= MAX_PRODUCT_IMAGE_SIZE_IN_BYTES,
+                size <= MAX_SIZE_IN_BYTES,
                 "sizeInBytes must not exceed 10 MiB"
         );
         return size;

@@ -3,7 +3,7 @@ package org.ayachinene.app.file;
 import org.ayachinene.app.file.domain.FilePurpose;
 import org.ayachinene.app.file.domain.FileStatus;
 import org.ayachinene.app.file.domain.Files;
-import org.ayachinene.app.file.upload.PrepareProductImageUploadInput;
+import org.ayachinene.app.file.upload.FileUploadDefinition;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,14 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FilesTest {
 
     @Test
-    void preparesUploadingProductImage() {
-        var file = Files.createProductImageResource(
-                new PrepareProductImageUploadInput(
-                        "black-shirt.png",
-                        "image/png",
-                        1024L
-                )
-        );
+    void createsUploadingFileFromDefinition() {
+        var file = Files.create(new FileUploadDefinition(
+                "product-images/",
+                "black-shirt.png",
+                "image/png",
+                1024L,
+                FilePurpose.PRODUCT_IMAGE
+        ));
 
         assertEquals(FilePurpose.PRODUCT_IMAGE, file.purpose());
         assertEquals(FileStatus.UPLOADING, file.status());

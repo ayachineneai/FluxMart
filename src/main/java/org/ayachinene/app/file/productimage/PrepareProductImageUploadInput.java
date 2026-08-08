@@ -1,4 +1,4 @@
-package org.ayachinene.app.file.upload;
+package org.ayachinene.app.file.productimage;
 
 public record PrepareProductImageUploadInput(
         String filename,

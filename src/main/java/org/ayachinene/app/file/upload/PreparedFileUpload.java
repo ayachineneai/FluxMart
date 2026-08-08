@@ -6,7 +6,7 @@ import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.OffsetDateTime;
 
-public record PreparedProductImageUpload(
+public record PreparedFileUpload(
         UUID7 fileId,
         FileStatus status,
         UploadAuthorization authorization,
