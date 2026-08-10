@@ -9,7 +9,7 @@ public final class Files {
     private Files() {
     }
 
-    public static FileResource create(NewFileResource newFile) {
+    public static FileResource createForUpload(NewFileResource newFile) {
         var fileId = UUID7s.generate();
         return new FileResource(
                 fileId,
@@ -30,13 +30,17 @@ public final class Files {
             FileResource file,
             StoredObject storedObject
     ) {
-        requireUploadCanBeConfirmed(file);
+        checkForConfirm(file);
         if (file.sizeInBytes() != storedObject.sizeInBytes()) {
             throw cannotConfirm(file, "uploaded object size does not match");
         }
         if (!file.contentType().equals(storedObject.contentType())) {
             throw cannotConfirm(file, "uploaded object content type does not match");
         }
+        return markAvailable(file);
+    }
+
+    private static FileResource markAvailable(FileResource file) {
         return new FileResource(
                 file.fileId(),
                 file.objectKey(),
@@ -48,7 +52,7 @@ public final class Files {
         );
     }
 
-    public static void requireUploadCanBeConfirmed(FileResource file) {
+    public static void checkForConfirm(FileResource file) {
         if (file.status() != FileStatus.UPLOADING) {
             throw cannotConfirm(file, "status must be UPLOADING");
         }

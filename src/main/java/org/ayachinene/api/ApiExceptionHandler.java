@@ -3,6 +3,9 @@ package org.ayachinene.api;
 import org.ayachinene.app.exception.ValidationException;
 import org.ayachinene.app.file.domain.FileResourceNotFoundException;
 import org.ayachinene.app.file.domain.FileUploadCannotBeConfirmedException;
+import org.ayachinene.app.order.domain.OrderCannotBeCreatedException;
+import org.ayachinene.app.order.domain.OrderIdempotencyConflictException;
+import org.ayachinene.app.stock.reservation.InsufficientStockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,5 +44,29 @@ public class ApiExceptionHandler {
                 "FILE_UPLOAD_CANNOT_BE_CONFIRMED",
                 exception.getMessage()
         );
+    }
+
+    @ExceptionHandler(OrderCannotBeCreatedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleOrderCannotBeCreated(
+            OrderCannotBeCreatedException exception
+    ) {
+        return new ApiError("ORDER_CANNOT_BE_CREATED", exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderIdempotencyConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleOrderIdempotencyConflict(
+            OrderIdempotencyConflictException exception
+    ) {
+        return new ApiError("ORDER_IDEMPOTENCY_CONFLICT", exception.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleInsufficientStock(
+            InsufficientStockException exception
+    ) {
+        return new ApiError("INSUFFICIENT_STOCK", exception.getMessage());
     }
 }

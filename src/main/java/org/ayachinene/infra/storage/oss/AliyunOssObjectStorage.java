@@ -24,17 +24,17 @@ public class AliyunOssObjectStorage implements ObjectStorage {
     private static final String SIGNATURE_VERSION = "OSS4-HMAC-SHA256";
     private static final String SUCCESS_STATUS = "201";
     private static final DateTimeFormatter SIGNING_DATE =
-            DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.UTC);
+        DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.UTC);
     private static final DateTimeFormatter SIGNING_DATE_TIME =
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
-                    .withZone(ZoneOffset.UTC);
+        DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+            .withZone(ZoneOffset.UTC);
 
     private final OSS ossClient;
     private final OssProperties properties;
 
     public AliyunOssObjectStorage(
-            OSS ossClient,
-            OssProperties properties
+        OSS ossClient,
+        OssProperties properties
     ) {
         this.ossClient = ossClient;
         this.properties = properties;
@@ -42,73 +42,73 @@ public class AliyunOssObjectStorage implements ObjectStorage {
 
     @Override
     public UploadAuthorization authorizeUpload(
-            String objectKey,
-            String contentType,
-            long sizeInBytes,
-            OffsetDateTime expiresAt
+        String objectKey,
+        String contentType,
+        long sizeInBytes,
+        OffsetDateTime expiresAt
     ) {
         var signingInstant = Instant.now();
         var credential = credential(signingInstant);
         var signingDateTime = SIGNING_DATE_TIME.format(signingInstant);
 
         var policy = ossClient.generatePostPolicy(
-                Date.from(expiresAt.toInstant()),
+            Date.from(expiresAt.toInstant()),
             uploadConditions(
-                    objectKey,
-                    contentType,
-                    sizeInBytes,
-                    credential,
-                    signingDateTime
+                objectKey,
+                contentType,
+                sizeInBytes,
+                credential,
+                signingDateTime
             )
         );
         var signature = ossClient.calculatePostSignature(
-                policy,
-                Date.from(signingInstant)
+            policy,
+            Date.from(signingInstant)
         );
 
         return new UploadAuthorization(
-                uploadUrl(),
-                new UploadFormFields(
-                        objectKey,
-                        contentType,
-                        SUCCESS_STATUS,
-                        "true",
-                        Base64s.encode(policy),
-                        SIGNATURE_VERSION,
-                        credential,
-                        signingDateTime,
-                        signature
-                )
+            uploadUrl(),
+            new UploadFormFields(
+                objectKey,
+                contentType,
+                SUCCESS_STATUS,
+                "true",
+                Base64s.encode(policy),
+                SIGNATURE_VERSION,
+                credential,
+                signingDateTime,
+                signature
+            )
         );
     }
 
     private PolicyConditions uploadConditions(
-            String objectKey,
-            String contentType,
-            long sizeInBytes,
-            String credential,
-            String signingDateTime
+        String objectKey,
+        String contentType,
+        long sizeInBytes,
+        String credential,
+        String signingDateTime
     ) {
         var conditions = new PolicyConditions();
         conditions.addConditionItem("bucket", properties.bucket());
         conditions.addConditionItem(PolicyConditions.COND_KEY, objectKey);
         conditions.addConditionItem(
-                PolicyConditions.COND_CONTENT_TYPE,
-                contentType
+            PolicyConditions.COND_CONTENT_TYPE,
+            contentType
         );
         conditions.addConditionItem(
-                PolicyConditions.COND_CONTENT_LENGTH_RANGE,
-                sizeInBytes,
-                sizeInBytes
+            PolicyConditions.COND_CONTENT_LENGTH_RANGE,
+            sizeInBytes,
+            sizeInBytes
         );
         conditions.addConditionItem(
-                PolicyConditions.COND_SUCCESS_ACTION_STATUS,
-                SUCCESS_STATUS
+            PolicyConditions.COND_SUCCESS_ACTION_STATUS,
+            SUCCESS_STATUS
         );
         conditions.addConditionItem("x-oss-forbid-overwrite", "true");
         conditions.addConditionItem(
-                "x-oss-signature-version",
-                SIGNATURE_VERSION
+            "x-oss-signature-version",
+            SIGNATURE_VERSION
         );
         conditions.addConditionItem("x-oss-credential", credential);
         conditions.addConditionItem("x-oss-date", signingDateTime);
@@ -117,31 +117,31 @@ public class AliyunOssObjectStorage implements ObjectStorage {
 
     private String credential(Instant signingInstant) {
         return "%s/%s/%s/oss/aliyun_v4_request".formatted(
-                properties.accessKeyId(),
-                SIGNING_DATE.format(signingInstant),
-                properties.region()
+            properties.accessKeyId(),
+            SIGNING_DATE.format(signingInstant),
+            properties.region()
         );
     }
 
     private String uploadUrl() {
         var endpointUri = URI.create(properties.endpoint());
         return endpointUri.getScheme()
-                + "://"
-                + properties.bucket()
-                + "."
-                + endpointUri.getRawAuthority();
+            + "://"
+            + properties.bucket()
+            + "."
+            + endpointUri.getRawAuthority();
     }
 
     @Override
     public Optional<StoredObject> find(String objectKey) {
         try {
             var metadata = ossClient.getObjectMetadata(
-                    properties.bucket(),
-                    objectKey
+                properties.bucket(),
+                objectKey
             );
             return Optional.of(new StoredObject(
-                    metadata.getContentType(),
-                    metadata.getContentLength()
+                metadata.getContentType(),
+                metadata.getContentLength()
             ));
         } catch (OSSException exception) {
             if ("NoSuchKey".equals(exception.getErrorCode())) {

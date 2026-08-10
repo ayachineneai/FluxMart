@@ -13,7 +13,7 @@ class FilesTest {
 
     @Test
     void createsUploadingFileFromDefinition() {
-        var file = Files.create(new NewFileResource(
+        var file = Files.createForUpload(new NewFileResource(
                 "product-images/",
                 "black-shirt.png",
                 "image/png",

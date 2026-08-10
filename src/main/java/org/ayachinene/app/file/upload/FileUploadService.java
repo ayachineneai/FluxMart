@@ -20,59 +20,70 @@ public class FileUploadService {
     private final ObjectStorage objectStorage;
 
     public FileUploadService(
-            FileResourceRepository fileRepository,
-            ObjectStorage objectStorage
+        FileResourceRepository fileRepository,
+        ObjectStorage objectStorage
     ) {
         this.fileRepository = fileRepository;
         this.objectStorage = objectStorage;
     }
 
     public PreparedFileUpload prepareUpload(NewFileResource newFile) {
-        var file = Files.create(newFile);
+        var file = Files.createForUpload(newFile);
         var expiresAt = OffsetDateTime.now()
-                .plusMinutes(UPLOAD_AUTHORIZATION_MINUTES);
+            .plusMinutes(UPLOAD_AUTHORIZATION_MINUTES);
+
         var authorization = objectStorage.authorizeUpload(
-                file.objectKey(),
-                file.contentType(),
-                file.sizeInBytes(),
-                expiresAt
+            file.objectKey(),
+            file.contentType(),
+            file.sizeInBytes(),
+            expiresAt
         );
 
         fileRepository.create(file, expiresAt);
 
         return new PreparedFileUpload(
-                file.fileId(),
-                file.status(),
-                authorization,
-                expiresAt
+            file.fileId(),
+            file.status(),
+            authorization,
+            expiresAt
         );
     }
 
     public ConfirmedFileUpload confirmUpload(UUID7 fileId) {
         var file = fileRepository.find(fileId);
+
         if (file.status() == FileStatus.AVAILABLE) {
             return confirmedUpload(fileId);
         }
-        Files.requireUploadCanBeConfirmed(file);
+
+        Files.checkForConfirm(file);
 
         var storedObject = objectStorage.find(file.objectKey())
-                .orElseThrow(() -> new FileUploadCannotBeConfirmedException(
-                        fileId,
-                        "uploaded object does not exist"
-                ));
-        var confirmedFile = Files.confirmUpload(file, storedObject);
-        var updated = fileRepository.updateStatus(
+            .orElseThrow(() -> new FileUploadCannotBeConfirmedException(
                 fileId,
-                FileStatus.UPLOADING,
-                confirmedFile.status()
+                "uploaded object does not exist"
+            ));
+
+        var confirmedFile = Files.confirmUpload(file, storedObject);
+
+        var updated = fileRepository.updateStatus(
+            fileId,
+            FileStatus.UPLOADING,
+            confirmedFile.status()
         );
-        if (!updated && fileRepository.find(fileId).status() != FileStatus.AVAILABLE) {
+        if (!updated) {
+            checkConcurrentConfirmation(fileId);
+        }
+        return confirmedUpload(fileId);
+    }
+
+    private void checkConcurrentConfirmation(UUID7 fileId) {
+        if (fileRepository.find(fileId).status() != FileStatus.AVAILABLE) {
             throw new FileUploadCannotBeConfirmedException(
                     fileId,
                     "status changed concurrently"
             );
         }
-        return confirmedUpload(fileId);
     }
 
     private ConfirmedFileUpload confirmedUpload(UUID7 fileId) {

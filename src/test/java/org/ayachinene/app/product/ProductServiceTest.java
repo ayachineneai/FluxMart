@@ -12,6 +12,7 @@ import org.ayachinene.app.product.creation.SpecificationInput;
 import org.ayachinene.app.product.repository.SkuRepository;
 import org.ayachinene.app.exception.ValidationException;
 import org.ayachinene.app.service.Tx;
+import org.ayachinene.app.stock.repository.StockRepository;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -38,6 +39,7 @@ class ProductServiceTest {
         var service = new ProductService(
                 productRepository,
                 mock(SkuRepository.class),
+                mock(StockRepository.class),
                 transactionRunner
         );
 
@@ -77,6 +79,7 @@ class ProductServiceTest {
         var service = new ProductService(
                 productRepository,
                 skuRepository,
+                mock(StockRepository.class),
                 transactionRunner
         );
 
@@ -109,6 +112,7 @@ class ProductServiceTest {
     @Test
     void savesProductSpecificationsAndSkusInOrder() {
         var productRepository = mock(ProductRepository.class);
+        var stockRepository = mock(StockRepository.class);
         var transactionRunner = mock(Tx.class);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -117,6 +121,7 @@ class ProductServiceTest {
         var service = new ProductService(
                 productRepository,
                 mock(SkuRepository.class),
+                stockRepository,
                 transactionRunner
         );
 
@@ -144,5 +149,8 @@ class ProductServiceTest {
         assertEquals(productCode, creation.product().productCode());
         assertEquals("颜色", creation.specifications().getFirst().name());
         assertEquals("TSHIRT-BLACK", creation.skus().getFirst().merchantSkuCode());
+        verify(stockRepository).initialize(List.of(
+                creation.skus().getFirst().skuCode()
+        ));
     }
 }

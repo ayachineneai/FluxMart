@@ -28,6 +28,29 @@ CREATE TABLE IF NOT EXISTS file_resource
     KEY idx_status_upload_expires_at (status, upload_expires_at)
 ) COMMENT = '文件资源';
 
+DROP TABLE IF EXISTS user_account;
+CREATE TABLE IF NOT EXISTS user_account
+(
+    id         BINARY(16)    COMMENT 'UUIDv7 数据库内部主键',
+
+    username   VARCHAR(50)
+               CHARACTER SET utf8mb4
+               COLLATE utf8mb4_bin
+               COMMENT '用户账户名，区分大小写',
+    email      VARCHAR(320)
+               CHARACTER SET ascii
+               COLLATE ascii_bin
+               COMMENT '应用层规范化为小写后的登录邮箱',
+    status     VARCHAR(20)   COMMENT '正常-ACTIVE、已禁用-DISABLED',
+
+    created_at DATETIME(3)   COMMENT '创建时间',
+    updated_at DATETIME(3)   COMMENT '最后修改时间',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_username (username),
+    UNIQUE KEY uk_email (email)
+) COMMENT = '用户账户';
+
 DROP TABLE IF EXISTS product;
 CREATE TABLE IF NOT EXISTS product
 (
@@ -146,3 +169,101 @@ CREATE TABLE IF NOT EXISTS sku_specification_selection
     KEY idx_specification_id (specification_id),
     KEY idx_specification_value_id (specification_value_id)
 ) COMMENT = 'SKU 销售规格选择';
+
+DROP TABLE IF EXISTS stock;
+CREATE TABLE IF NOT EXISTS stock
+(
+    id                 BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
+    sku_id             BINARY(16)      COMMENT 'SKU 内部主键',
+
+    available_quantity BIGINT UNSIGNED COMMENT '当前可用于下单的库存数量',
+    reserved_quantity  BIGINT UNSIGNED COMMENT '已被订单预占的库存数量',
+
+    version            BIGINT UNSIGNED COMMENT '乐观锁版本',
+    created_at         DATETIME(3)     COMMENT '创建时间',
+    updated_at         DATETIME(3)     COMMENT '最后修改时间',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_sku_id (sku_id)
+) COMMENT = 'SKU 库存';
+
+DROP TABLE IF EXISTS customer_order;
+CREATE TABLE IF NOT EXISTS customer_order
+(
+    id                 BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
+
+    order_code         VARCHAR(24)
+                       CHARACTER SET ascii
+                       COLLATE ascii_bin
+                       COMMENT '系统生成的订单业务编号，区分大小写',
+    user_id            BINARY(16)      COMMENT '下单用户内部主键',
+    request_key        VARCHAR(64)
+                       CHARACTER SET ascii
+                       COLLATE ascii_bin
+                       COMMENT '创建订单请求幂等键',
+
+    status             VARCHAR(30)     COMMENT '待支付-PENDING_PAYMENT、已支付-PAID、已取消-CANCELLED、已关闭-CLOSED',
+    total_amount       BIGINT UNSIGNED COMMENT '订单总金额，单位为人民币分',
+    payment_expires_at DATETIME(3)     COMMENT '支付截止时间，超时后关闭订单并释放库存',
+
+    version            BIGINT UNSIGNED COMMENT '乐观锁版本',
+    created_at         DATETIME(3)     COMMENT '创建时间',
+    updated_at         DATETIME(3)     COMMENT '最后修改时间',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_order_code (order_code),
+    UNIQUE KEY uk_user_request_key (user_id, request_key),
+    KEY idx_user_id_created_at (user_id, created_at),
+    KEY idx_status_payment_expires_at (status, payment_expires_at)
+) COMMENT = '用户订单';
+
+DROP TABLE IF EXISTS order_item;
+CREATE TABLE IF NOT EXISTS order_item
+(
+    id                     BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
+    order_id               BINARY(16)      COMMENT '所属订单内部主键',
+
+    product_code           VARCHAR(24)
+                           CHARACTER SET ascii
+                           COLLATE ascii_bin
+                           COMMENT '下单时的商品业务编号',
+    sku_code               VARCHAR(24)
+                           CHARACTER SET ascii
+                           COLLATE ascii_bin
+                           COMMENT '下单时的 SKU 业务编号',
+
+    product_title          VARCHAR(50)     COMMENT '下单时的商品标题快照',
+    specification_snapshot JSON            COMMENT '下单时有序的规格身份与展示文本快照',
+    image_file_id          BINARY(16)      COMMENT '下单时采用的商品或 SKU 图片文件 ID',
+
+    unit_price_amount      BIGINT UNSIGNED COMMENT '下单时的 SKU 单价，单位为人民币分',
+    quantity               INT UNSIGNED    COMMENT '购买数量',
+    total_amount           BIGINT UNSIGNED COMMENT '订单项总金额，等于单价乘以数量',
+    sort_order             INT UNSIGNED    COMMENT '订单内从 0 开始的展示顺序',
+
+    created_at             DATETIME(3)     COMMENT '创建时间',
+
+    PRIMARY KEY (id),
+    KEY idx_order_id (order_id)
+) COMMENT = '订单商品项';
+
+DROP TABLE IF EXISTS stock_reservation;
+CREATE TABLE IF NOT EXISTS stock_reservation
+(
+    id            BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
+    order_id      BINARY(16)      COMMENT '所属订单内部主键',
+    order_item_id BINARY(16)      COMMENT '对应订单商品项内部主键',
+    sku_id        BINARY(16)      COMMENT '被预占库存的 SKU 内部主键',
+
+    quantity      BIGINT UNSIGNED COMMENT '预占数量',
+    status        VARCHAR(20)     COMMENT '已预占-RESERVED、已确认-CONFIRMED、已释放-RELEASED',
+    expires_at    DATETIME(3)     COMMENT '预占过期时间，通常与订单支付截止时间一致',
+
+    created_at    DATETIME(3)     COMMENT '创建时间',
+    updated_at    DATETIME(3)     COMMENT '最后修改时间',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_order_item_id (order_item_id),
+    KEY idx_order_id_status (order_id, status),
+    KEY idx_status_expires_at (status, expires_at)
+) COMMENT = '库存预占记录';

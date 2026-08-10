@@ -2,6 +2,7 @@ package org.ayachinene.infra.persistence.typehandler;
 
 import org.apache.ibatis.type.JdbcType;
 import org.ayachinene.app.product.domain.CategoryCode;
+import org.ayachinene.app.order.domain.OrderCode;
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,18 @@ class DomainValueTypeHandlerTest {
         assertEquals(
                 skuCode,
                 new SkuCodeTypeHandler().getNullableResult(resultSet, "value")
+        );
+    }
+
+    @Test
+    void mapsOrderCodeToVarchar() throws Exception {
+        var orderCode = new OrderCode("ORD_23456789ABCDEFGHJKMN");
+        var resultSet = mock(ResultSet.class);
+        when(resultSet.getString("value")).thenReturn(orderCode.value());
+
+        assertEquals(
+                orderCode,
+                new OrderCodeTypeHandler().getNullableResult(resultSet, "value")
         );
     }
 
