@@ -37,7 +37,7 @@ public final class Skus {
         return new Sku(
                 SkuCode.generate(),
                 input.merchantSkuCode(),
-                SkuStatus.DISABLED,
+                SkuStatus.ENABLED,
                 new Money(input.price()),
                 input.imageFileId(),
                 input.selections().stream()

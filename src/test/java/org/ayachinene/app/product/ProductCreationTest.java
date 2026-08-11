@@ -47,7 +47,7 @@ class ProductCreationTest {
         var selection = sku.specificationSelections().getFirst();
 
         assertEquals(SpecificationStatus.ENABLED, specification.status());
-        assertEquals(SkuStatus.DISABLED, sku.status());
+        assertEquals(SkuStatus.ENABLED, sku.status());
         assertEquals(specification.specificationId(), selection.specificationId());
         assertEquals(value.specificationValueId(), selection.specificationValueId());
     }
