@@ -21,7 +21,7 @@ class ProductCreationTest {
 
     @Test
     void createsSpecificationsAndResolvesSkuSelections() {
-        var creation = Products.create(
+        var creation = Products.toCreation(
                 new CreateProductInput(
                         new ProductDetailsInput(
                                 "T-Shirt",

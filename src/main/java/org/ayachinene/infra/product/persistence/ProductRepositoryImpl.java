@@ -8,8 +8,6 @@ import org.ayachinene.app.product.domain.ProductVersionConflictException;
 import org.ayachinene.app.product.creation.ProductCreation;
 import org.ayachinene.app.product.publication.ProductPublication;
 import org.ayachinene.app.product.publication.ProductPublicationState;
-import org.ayachinene.infra.product.persistence.sku.SkuWriter;
-import org.ayachinene.infra.product.persistence.specification.SpecificationWriter;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.product.persistence.converter.ProductPersistenceConverter;
@@ -22,64 +20,39 @@ import java.util.List;
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
 
-    private static final long INITIAL_VERSION = 0L;
-
     private final ProductMapper productMapper;
     private final ProductGalleryImageMapper galleryImageMapper;
-    private final SpecificationWriter specificationWriter;
-    private final SkuWriter skuWriter;
+    private final ProductCreationWriter creationWriter;
     private final ProductPersistenceConverter persistenceConverter;
 
     public ProductRepositoryImpl(
         ProductMapper productMapper,
         ProductGalleryImageMapper galleryImageMapper,
-        SpecificationWriter specificationWriter,
-        SkuWriter skuWriter,
+        ProductCreationWriter creationWriter,
         ProductPersistenceConverter persistenceConverter
     ) {
         this.productMapper = productMapper;
         this.galleryImageMapper = galleryImageMapper;
-        this.specificationWriter = specificationWriter;
-        this.skuWriter = skuWriter;
+        this.creationWriter = creationWriter;
         this.persistenceConverter = persistenceConverter;
     }
 
     @Override
     public void create(ProductCreation creation) {
-        var product = creation.product();
-        var newProductId = UUID7s.generate();
-        var createdAt = LocalDateTime.now();
-
-        insertProduct(newProductId, product, createdAt);
-        insertGalleryImages(newProductId, product.galleryImageFileIds(), createdAt);
-        var specificationIds = specificationWriter.insert(
-            newProductId,
-            creation.specifications(),
-            createdAt
-        );
-        skuWriter.insert(newProductId, creation.skus(), specificationIds, createdAt);
-    }
-
-    private void insertProduct(UUID7 newProductId, Product product, LocalDateTime createdAt) {
-        var productPo = persistenceConverter.toProductPo(product)
-            .setId(newProductId)
-            .setVersion(INITIAL_VERSION)
-            .setCreatedAt(createdAt)
-            .setUpdatedAt(createdAt);
-
-        productMapper.insert(productPo);
+        creationWriter.insert(creation);
     }
 
     private void insertGalleryImages(
         UUID7 productId,
         List<UUID7> galleryImageFileIds,
+        List<UUID7> galleryImageIds,
         LocalDateTime createdAt
     ) {
         if (galleryImageFileIds.isEmpty()) return;
 
         var images = Streams.withIndex(galleryImageFileIds)
             .map(indexed -> persistenceConverter.toGalleryImagePo(indexed.value())
-                .setId(UUID7s.generate())
+                .setId(galleryImageIds.get(indexed.index()))
                 .setProductId(productId)
                 .setSortOrder(indexed.index())
                 .setCreatedAt(createdAt)
@@ -132,8 +105,17 @@ public class ProductRepositoryImpl implements ProductRepository {
         UUID7 existingProductId,
         LocalDateTime createdAt
     ) {
+        var galleryImageIds = galleryImageFileIds.stream()
+            .map(fileId -> UUID7s.generate())
+            .toList();
+
         galleryImageMapper.deleteByProductId(existingProductId);
-        insertGalleryImages(existingProductId, galleryImageFileIds, createdAt);
+        insertGalleryImages(
+            existingProductId,
+            galleryImageFileIds,
+            galleryImageIds,
+            createdAt
+        );
     }
 
     @Override

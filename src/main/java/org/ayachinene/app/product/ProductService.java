@@ -33,7 +33,7 @@ public class ProductService {
     }
 
     public ProductCode createProduct(CreateProductInput input) {
-        var creation = Products.create(input);
+        var creation = Products.toCreation(input);
 
         tx.run(() -> {
             productRepository.create(creation);

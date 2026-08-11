@@ -23,7 +23,7 @@ public final class Products {
     private Products() {
     }
 
-    public static ProductCreation create(CreateProductInput input) {
+    public static ProductCreation toCreation(CreateProductInput input) {
         var details = ProductValidator.validate(input.details());
         var specificationInputs = SpecificationValidator.validate(input.specifications());
         var skuInputs = SkuValidator.validate(input.skus());

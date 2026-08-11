@@ -46,7 +46,7 @@ class ProductsTest {
                 ))
         );
 
-        var product = Products.create(input).product();
+        var product = Products.toCreation(input).product();
 
         assertTrue(product.productCode().value().startsWith("PRD_"));
         assertEquals(ProductStatus.DRAFT, product.status());

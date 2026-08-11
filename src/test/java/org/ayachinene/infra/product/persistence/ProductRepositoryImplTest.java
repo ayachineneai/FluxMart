@@ -8,9 +8,6 @@ import org.ayachinene.app.product.domain.ProductStatus;
 import org.ayachinene.app.product.domain.ProductVersionConflictException;
 import org.ayachinene.app.product.creation.ProductCreation;
 import org.ayachinene.app.product.publication.ProductPublication;
-import org.ayachinene.infra.product.persistence.sku.SkuWriter;
-import org.ayachinene.infra.product.persistence.specification.SpecificationWriter;
-import org.ayachinene.infra.product.persistence.specification.SpecificationPersistenceIds;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.product.persistence.converter.ProductPersistenceConverter;
@@ -20,7 +17,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,67 +31,20 @@ import static org.mockito.Mockito.when;
 class ProductRepositoryImplTest {
 
     @Test
-    @SuppressWarnings("unchecked")
-    void insertsProductAndOrderedGalleryImages() {
+    void delegatesProductCreationToWriter() {
         var productMapper = mock(ProductMapper.class);
         var galleryMapper = mock(ProductGalleryImageMapper.class);
-        var specificationWriter = mock(SpecificationWriter.class);
-        var skuWriter = mock(SkuWriter.class);
-        when(productMapper.insert(any(ProductPO.class))).thenReturn(1);
-        var specificationIds = new SpecificationPersistenceIds(Map.of(), Map.of());
-        when(specificationWriter.insert(any(), any(), any()))
-                .thenReturn(specificationIds);
-
-        var firstImage = UUID7s.generate();
-        var secondImage = UUID7s.generate();
-        var product = new Product(
-                ProductCode.generate(),
-                ProductStatus.DRAFT,
-                "Product",
-                null,
-                "Description",
-                new CategoryCode("CATEGORY"),
-                UUID7s.generate(),
-                List.of(firstImage, secondImage)
-        );
+        var creationWriter = mock(ProductCreationWriter.class);
+        var creation = mock(ProductCreation.class);
 
         new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                specificationWriter,
-                skuWriter,
+                creationWriter,
                 Mappers.getMapper(ProductPersistenceConverter.class)
-        ).create(new ProductCreation(product, List.of(), List.of()));
+        ).create(creation);
 
-        var productCaptor = ArgumentCaptor.forClass(ProductPO.class);
-        verify(productMapper).insert(productCaptor.capture());
-        var savedProduct = productCaptor.getValue();
-        assertNotNull(savedProduct.getId());
-        assertEquals(product.productCode(), savedProduct.getProductCode());
-        assertEquals(ProductStatus.DRAFT, savedProduct.getStatus());
-        assertEquals(0L, savedProduct.getVersion());
-
-        var galleryCaptor = ArgumentCaptor.forClass(List.class);
-        verify(galleryMapper).insertBatch(galleryCaptor.capture());
-        var savedImages = galleryCaptor.getValue();
-        var savedFirstImage = (ProductGalleryImagePO) savedImages.get(0);
-        var savedSecondImage = (ProductGalleryImagePO) savedImages.get(1);
-        assertEquals(savedProduct.getId(), savedFirstImage.getProductId());
-        assertEquals(firstImage, savedFirstImage.getFileId());
-        assertEquals(0, savedFirstImage.getSortOrder());
-        assertEquals(secondImage, savedSecondImage.getFileId());
-        assertEquals(1, savedSecondImage.getSortOrder());
-        verify(specificationWriter).insert(
-                eq(savedProduct.getId()),
-                eq(List.of()),
-                eq(savedProduct.getCreatedAt())
-        );
-        verify(skuWriter).insert(
-                eq(savedProduct.getId()),
-                eq(List.of()),
-                eq(specificationIds),
-                eq(savedProduct.getCreatedAt())
-        );
+        verify(creationWriter).insert(creation);
     }
 
     @Test
@@ -238,8 +187,7 @@ class ProductRepositoryImplTest {
         return new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                mock(SpecificationWriter.class),
-                mock(SkuWriter.class),
+                mock(ProductCreationWriter.class),
                 Mappers.getMapper(ProductPersistenceConverter.class)
         );
     }
