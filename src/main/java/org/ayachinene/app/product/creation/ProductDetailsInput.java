@@ -2,7 +2,6 @@ package org.ayachinene.app.product.creation;
 
 import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.shared.uuid7.UUID7;
-import org.ayachinene.utils.Lists;
 
 import java.util.List;
 
@@ -14,10 +13,4 @@ public record ProductDetailsInput(
         UUID7 primaryImageFileId,
         List<UUID7> galleryImageFileIds
 ) {
-
-    public ProductDetailsInput {
-        galleryImageFileIds = List.copyOf(
-                Lists.nullToEmpty(galleryImageFileIds)
-        );
-    }
 }
