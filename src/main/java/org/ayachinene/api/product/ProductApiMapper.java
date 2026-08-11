@@ -2,9 +2,9 @@ package org.ayachinene.api.product;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
 import org.ayachinene.api.product.data.PublishProductResponse;
+import org.ayachinene.app.product.creation.CreateProductInput;
 import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.app.product.domain.ProductCode;
-import org.ayachinene.app.product.creation.*;
 import org.ayachinene.app.product.publication.PublishProductInput;
 import org.ayachinene.app.product.publication.PublishProductResult;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -19,20 +19,14 @@ public class ProductApiMapper {
 
     public CreateProductInput toInput(CreateProductRequest request) {
         return new CreateProductInput(
-            details(request),
-            specifications(request.specifications()),
-            skus(request.skus())
-        );
-    }
-
-    private ProductDetailsInput details(CreateProductRequest request) {
-        return new ProductDetailsInput(
-            request.title(),
-            request.subtitle(),
-            request.description(),
-            categoryCode(request.categoryCode()),
-            fileResourceId(request.primaryImageFileId()),
-            fileResourceIds(request.galleryImageFileIds())
+                request.title(),
+                request.subtitle(),
+                request.description(),
+                categoryCode(request.categoryCode()),
+                fileId(request.primaryImageFileId()),
+                fileIds(request.galleryImageFileIds()),
+                specifications(request.specifications()),
+                skus(request.skus())
         );
     }
 
@@ -40,67 +34,62 @@ public class ProductApiMapper {
         return Values.map(value, CategoryCode::new);
     }
 
-    private UUID7 fileResourceId(String value) {
+    private UUID7 fileId(String value) {
         return Values.map(
-            value,
-            input -> UUID7.fromString(input, "fileResourceId")
+                value,
+                input -> UUID7.fromString(input, "fileResourceId")
         );
     }
 
-    private List<UUID7> fileResourceIds(List<String> values) {
-        return Streams.of(values)
-            .map(this::fileResourceId)
-            .toList();
+    private List<UUID7> fileIds(List<String> values) {
+        return Streams.of(values).map(this::fileId).toList();
     }
 
-    private List<SpecificationInput> specifications(
-        List<CreateProductRequest.SpecificationRequest> requests
+    private List<CreateProductInput.Specification> specifications(
+            List<CreateProductRequest.SpecificationRequest> requests
     ) {
         return Streams.of(requests)
-            .map(this::specification)
-            .toList();
+                .map(this::specification)
+                .toList();
     }
 
-    private SpecificationInput specification(
-        CreateProductRequest.SpecificationRequest request
+    private CreateProductInput.Specification specification(
+            CreateProductRequest.SpecificationRequest request
     ) {
-        return Values.map(
-            request,
-            value -> new SpecificationInput(value.name(), value.values())
-        );
+        return Values.map(request, value -> new CreateProductInput.Specification(
+                value.name(),
+                value.values()
+        ));
     }
 
-    private List<SkuInput> skus(List<CreateProductRequest.SkuRequest> requests) {
-        return Streams.of(requests)
-            .map(this::sku)
-            .toList();
+    private List<CreateProductInput.Sku> skus(
+            List<CreateProductRequest.SkuRequest> requests
+    ) {
+        return Streams.of(requests).map(this::sku).toList();
     }
 
-    private SkuInput sku(CreateProductRequest.SkuRequest request) {
-        return Values.map(
-            request,
-            value -> new SkuInput(
+    private CreateProductInput.Sku sku(CreateProductRequest.SkuRequest request) {
+        return Values.map(request, value -> new CreateProductInput.Sku(
                 value.merchantSkuCode(),
                 value.price(),
-                fileResourceId(value.imageFileId()),
+                fileId(value.imageFileId()),
                 selections(value.selections())
-            )
-        );
+        ));
     }
 
-    private List<SelectionInput> selections(
-        List<CreateProductRequest.SelectionRequest> requests
+    private List<CreateProductInput.Selection> selections(
+            List<CreateProductRequest.SelectionRequest> requests
     ) {
-        return Streams.of(requests)
-            .map(this::selection)
-            .toList();
+        return Streams.of(requests).map(this::selection).toList();
     }
 
-    private SelectionInput selection(CreateProductRequest.SelectionRequest request) {
-        return Values.map(
-            request,
-            value -> new SelectionInput(value.specification(), value.value())
-        );
+    private CreateProductInput.Selection selection(
+            CreateProductRequest.SelectionRequest request
+    ) {
+        return Values.map(request, value -> new CreateProductInput.Selection(
+                value.specification(),
+                value.value()
+        ));
     }
 
     public PublishProductInput toInput(

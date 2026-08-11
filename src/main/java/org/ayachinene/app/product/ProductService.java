@@ -1,10 +1,10 @@
 package org.ayachinene.app.product;
 
+import org.ayachinene.app.product.creation.CreateProductInput;
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.Products;
-import org.ayachinene.app.product.domain.sku.Sku;
+import org.ayachinene.app.product.creation.CreateProductValidator;
 import org.ayachinene.app.product.repository.ProductRepository;
-import org.ayachinene.app.product.creation.CreateProductInput;
 import org.ayachinene.app.product.publication.PublishProductInput;
 import org.ayachinene.app.product.publication.PublishProductResult;
 import org.ayachinene.app.product.repository.SkuRepository;
@@ -33,14 +33,13 @@ public class ProductService {
     }
 
     public ProductCode createProduct(CreateProductInput input) {
-        var creation = Products.toCreation(input);
-
-        tx.run(() -> {
-            productRepository.create(creation);
-            stockRepository.initialize(creation.skus().stream().map(Sku::skuCode).toList());
+        var validatedCreateInput = CreateProductValidator.validate(input);
+        var created = tx.run(() -> {
+            var product = productRepository.create(validatedCreateInput);
+            stockRepository.initialize(product.skuCodes());
+            return product;
         });
-
-        return creation.product().productCode();
+        return created.productCode();
     }
 
     public PublishProductResult publishProduct(PublishProductInput input) {

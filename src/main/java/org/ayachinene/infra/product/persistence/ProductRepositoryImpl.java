@@ -1,124 +1,42 @@
 package org.ayachinene.infra.product.persistence;
 
-import org.ayachinene.app.product.domain.Product;
+import org.ayachinene.app.product.creation.CreateProductInput;
+import org.ayachinene.app.product.creation.CreatedProduct;
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.ProductNotFoundException;
 import org.ayachinene.app.product.repository.ProductRepository;
 import org.ayachinene.app.product.domain.ProductVersionConflictException;
-import org.ayachinene.app.product.creation.ProductCreation;
 import org.ayachinene.app.product.publication.ProductPublication;
 import org.ayachinene.app.product.publication.ProductPublicationState;
-import org.ayachinene.shared.uuid7.UUID7;
-import org.ayachinene.shared.uuid7.UUID7s;
-import org.ayachinene.infra.product.persistence.converter.ProductPersistenceConverter;
-import org.ayachinene.utils.Streams;
+import org.ayachinene.infra.product.persistence.sku.SkuPO;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductMapper productMapper;
-    private final ProductGalleryImageMapper galleryImageMapper;
-    private final ProductCreationPersistenceConverter creationConverter;
+    private final ProductCreationPOFactory creationPOFactory;
     private final ProductCreationPersistenceInserter creationInserter;
-    private final ProductPersistenceConverter persistenceConverter;
 
     public ProductRepositoryImpl(
         ProductMapper productMapper,
-        ProductGalleryImageMapper galleryImageMapper,
-        ProductCreationPersistenceConverter creationConverter,
-        ProductCreationPersistenceInserter creationInserter,
-        ProductPersistenceConverter persistenceConverter
+        ProductCreationPOFactory creationPOFactory,
+        ProductCreationPersistenceInserter creationInserter
     ) {
         this.productMapper = productMapper;
-        this.galleryImageMapper = galleryImageMapper;
-        this.creationConverter = creationConverter;
+        this.creationPOFactory = creationPOFactory;
         this.creationInserter = creationInserter;
-        this.persistenceConverter = persistenceConverter;
     }
 
     @Override
-    public void create(ProductCreation creation) {
-        var pos = creationConverter.toPos(creation);
+    public CreatedProduct create(CreateProductInput input) {
+        var pos = creationPOFactory.toPos(input);
         creationInserter.insert(pos);
-    }
-
-    private void insertGalleryImages(
-        UUID7 productId,
-        List<UUID7> galleryImageFileIds,
-        List<UUID7> galleryImageIds,
-        LocalDateTime createdAt
-    ) {
-        if (galleryImageFileIds.isEmpty()) return;
-
-        var images = Streams.withIndex(galleryImageFileIds)
-            .map(indexed -> persistenceConverter.toGalleryImagePo(indexed.value())
-                .setId(galleryImageIds.get(indexed.index()))
-                .setProductId(productId)
-                .setSortOrder(indexed.index())
-                .setCreatedAt(createdAt)
-            )
-            .toList();
-        galleryImageMapper.insertBatch(images);
-    }
-
-    @Override
-    public void update(Product product, long expectedVersion) {
-        var existingProductId = productMapper.selectIdByProductCode(
-            product.productCode()
-        );
-
-        if (existingProductId == null) {
-            throw new ProductNotFoundException(product.productCode());
-        }
-
-        var updatedAt = LocalDateTime.now();
-        updateProduct(product, expectedVersion, updatedAt);
-        replaceGalleryImages(
-            product.galleryImageFileIds(),
-            existingProductId,
-            updatedAt
-        );
-    }
-
-    private void updateProduct(
-        Product product,
-        long expectedVersion,
-        LocalDateTime updatedAt
-    ) {
-        var productPo = persistenceConverter.toProductPo(product)
-            .setUpdatedAt(updatedAt);
-
-        var affectedRows = productMapper.updateByProductCodeAndVersion(
-            productPo,
-            expectedVersion
-        );
-        if (affectedRows == 0) {
-            throw new ProductVersionConflictException(
-                product.productCode(),
-                expectedVersion
-            );
-        }
-    }
-
-    private void replaceGalleryImages(
-        List<UUID7> galleryImageFileIds,
-        UUID7 existingProductId,
-        LocalDateTime createdAt
-    ) {
-        var galleryImageIds = galleryImageFileIds.stream()
-            .map(fileId -> UUID7s.generate())
-            .toList();
-
-        galleryImageMapper.deleteByProductId(existingProductId);
-        insertGalleryImages(
-            existingProductId,
-            galleryImageFileIds,
-            galleryImageIds,
-            createdAt
+        return new CreatedProduct(
+            pos.product().getProductCode(),
+            pos.skus().stream().map(SkuPO::getSkuCode).toList()
         );
     }
 

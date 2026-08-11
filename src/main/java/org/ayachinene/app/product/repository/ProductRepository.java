@@ -1,16 +1,14 @@
 package org.ayachinene.app.product.repository;
 
-import org.ayachinene.app.product.domain.Product;
+import org.ayachinene.app.product.creation.CreateProductInput;
+import org.ayachinene.app.product.creation.CreatedProduct;
 import org.ayachinene.app.product.domain.ProductCode;
-import org.ayachinene.app.product.creation.ProductCreation;
 import org.ayachinene.app.product.publication.ProductPublication;
 import org.ayachinene.app.product.publication.ProductPublicationState;
 
 public interface ProductRepository {
 
-    void create(ProductCreation creation);
-
-    void update(Product product, long expectedVersion);
+    CreatedProduct create(CreateProductInput input);
 
     ProductPublicationState queryPublicationState(ProductCode productCode);
 

@@ -33,32 +33,33 @@ import java.util.List;
  * }</pre>
  */
 public record CreateProductRequest(
-    String title,
-    String subtitle,
-    String description,
-    String categoryCode,
-    String primaryImageFileId,
-    List<String> galleryImageFileIds,
-    List<SpecificationRequest> specifications,
-    List<SkuRequest> skus
+        String title,
+        String subtitle,
+        String description,
+        String categoryCode,
+        String primaryImageFileId,
+        List<String> galleryImageFileIds,
+        List<SpecificationRequest> specifications,
+        List<SkuRequest> skus
 ) {
+
     public record SpecificationRequest(
-        String name,
-        List<String> values
+            String name,
+            List<String> values
     ) {
     }
 
     public record SkuRequest(
-        String merchantSkuCode,
-        BigDecimal price,
-        String imageFileId,
-        List<SelectionRequest> selections
+            String merchantSkuCode,
+            BigDecimal price,
+            String imageFileId,
+            List<SelectionRequest> selections
     ) {
     }
 
     public record SelectionRequest(
-        String specification,
-        String value
+            String specification,
+            String value
     ) {
     }
 }
