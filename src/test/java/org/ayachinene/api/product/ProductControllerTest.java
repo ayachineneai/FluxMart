@@ -38,8 +38,8 @@ class ProductControllerTest {
         var inputCaptor = ArgumentCaptor.forClass(CreateProductInput.class);
         verify(productService).createProduct(inputCaptor.capture());
         var input = inputCaptor.getValue();
-        assertEquals("纯棉 T 恤", input.product().title());
-        assertEquals("TSHIRT", input.product().categoryCode().value());
+        assertEquals("纯棉 T 恤", input.details().title());
+        assertEquals("TSHIRT", input.details().categoryCode().value());
         assertEquals(1, input.specifications().size());
         assertEquals(1, input.skus().size());
     }

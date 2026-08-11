@@ -3,7 +3,7 @@ package org.ayachinene.app.product;
 import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.app.product.domain.Products;
 import org.ayachinene.app.product.creation.CreateProductInput;
-import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.ProductDetailsInput;
 import org.ayachinene.app.product.creation.SelectionInput;
 import org.ayachinene.app.product.creation.SkuInput;
 import org.ayachinene.app.product.creation.SpecificationInput;
@@ -23,7 +23,7 @@ class ProductCreationTest {
     void createsSpecificationsAndResolvesSkuSelections() {
         var creation = Products.create(
                 new CreateProductInput(
-                        new ProductInput(
+                        new ProductDetailsInput(
                                 "T-Shirt",
                                 null,
                                 "Cotton",

@@ -2,7 +2,7 @@ package org.ayachinene.app.product;
 
 import org.ayachinene.app.product.domain.*;
 import org.ayachinene.app.product.creation.CreateProductInput;
-import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.ProductDetailsInput;
 import org.ayachinene.app.product.creation.SelectionInput;
 import org.ayachinene.app.product.creation.SkuInput;
 import org.ayachinene.app.product.creation.SpecificationInput;
@@ -27,7 +27,7 @@ class ProductsTest {
         var primaryImageFileId = fileId("018f6b5c-7c00-7000-8000-000000000010");
         var galleryImageFileId = fileId("018f6b5c-7c00-7000-8000-000000000011");
         var gallery = new ArrayList<>(List.of(galleryImageFileId));
-        var productInput = new ProductInput(
+        var productInput = new ProductDetailsInput(
                 "  FluxMart T-Shirt  ",
                 "  Soft  ",
                 "  Cotton T-Shirt  ",
@@ -59,7 +59,7 @@ class ProductsTest {
 
     @Test
     void rejectsDuplicateGalleryUrls() {
-        var input = new ProductInput(
+        var input = new ProductDetailsInput(
                 "T-Shirt",
                 null,
                 "Cotton T-Shirt",

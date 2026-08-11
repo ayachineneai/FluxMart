@@ -1,6 +1,6 @@
 package org.ayachinene.app.product.domain;
 
-import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.ProductDetailsInput;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.utils.Lists;
 import org.ayachinene.utils.Streams;
@@ -17,8 +17,8 @@ public final class ProductValidator {
     private ProductValidator() {
     }
 
-    public static ProductInput validate(ProductInput input) {
-        return new ProductInput(
+    public static ProductDetailsInput validate(ProductDetailsInput input) {
+        return new ProductDetailsInput(
                 title(input.title()),
                 subtitle(input.subtitle()),
                 description(input.description()),

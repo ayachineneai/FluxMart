@@ -5,7 +5,7 @@ import org.ayachinene.app.product.repository.ProductRepository;
 import org.ayachinene.app.product.domain.ProductStatus;
 import org.ayachinene.app.product.creation.CreateProductInput;
 import org.ayachinene.app.product.creation.ProductCreation;
-import org.ayachinene.app.product.creation.ProductInput;
+import org.ayachinene.app.product.creation.ProductDetailsInput;
 import org.ayachinene.app.product.creation.SelectionInput;
 import org.ayachinene.app.product.creation.SkuInput;
 import org.ayachinene.app.product.creation.SpecificationInput;
@@ -44,7 +44,7 @@ class ProductServiceTest {
         );
 
         var productCode = service.createProduct(new CreateProductInput(
-                new ProductInput(
+                new ProductDetailsInput(
                         "  纯棉 T 恤  ",
                         null,
                         "  100% 纯棉  ",
@@ -84,7 +84,7 @@ class ProductServiceTest {
         );
 
         var input = new CreateProductInput(
-                new ProductInput(
+                new ProductDetailsInput(
                         "纯棉 T 恤",
                         null,
                         "100% 纯棉",
@@ -126,7 +126,7 @@ class ProductServiceTest {
         );
 
         var productCode = service.createProduct(new CreateProductInput(
-                new ProductInput(
+                new ProductDetailsInput(
                         "纯棉 T 恤",
                         null,
                         "100% 纯棉",

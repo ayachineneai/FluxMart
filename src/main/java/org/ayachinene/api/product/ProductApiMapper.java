@@ -21,14 +21,14 @@ public class ProductApiMapper {
 
     public CreateProductInput toInput(CreateProductRequest request) {
         return new CreateProductInput(
-            product(request),
+            details(request),
             specifications(request.specifications()),
             skus(request.skus())
         );
     }
 
-    private ProductInput product(CreateProductRequest request) {
-        return new ProductInput(
+    private ProductDetailsInput details(CreateProductRequest request) {
+        return new ProductDetailsInput(
             request.title(),
             request.subtitle(),
             request.description(),
