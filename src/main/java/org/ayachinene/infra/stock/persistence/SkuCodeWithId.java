@@ -3,7 +3,7 @@ package org.ayachinene.infra.stock.persistence;
 import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.shared.uuid7.UUID7;
 
-public class SkuStockTarget {
+public class SkuCodeWithId {
 
     private UUID7 skuId;
     private SkuCode skuCode;

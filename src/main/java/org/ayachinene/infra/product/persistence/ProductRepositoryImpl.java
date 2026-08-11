@@ -137,12 +137,10 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public ProductPublicationState findPublicationState(
+    public ProductPublicationState queryPublicationState(
         ProductCode productCode
     ) {
-        var product = productMapper.selectPublicationStateByProductCode(
-            productCode
-        );
+        var product = productMapper.queryPublicationStateByProductCode(productCode);
         if (product == null) {
             throw new ProductNotFoundException(productCode);
         }

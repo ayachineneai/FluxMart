@@ -192,14 +192,14 @@ class ProductRepositoryImplTest {
     void findsTheCurrentPublicationState() {
         var productMapper = mock(ProductMapper.class);
         var productCode = ProductCode.generate();
-        when(productMapper.selectPublicationStateByProductCode(productCode))
+        when(productMapper.queryPublicationStateByProductCode(productCode))
                 .thenReturn(new ProductPO()
                         .setProductCode(productCode)
                         .setStatus(ProductStatus.OFF_SALE)
                         .setVersion(3L));
 
         var state = repository(productMapper, mock(ProductGalleryImageMapper.class))
-                .findPublicationState(productCode);
+                .queryPublicationState(productCode);
 
         assertEquals(productCode, state.productCode());
         assertEquals(ProductStatus.OFF_SALE, state.status());
@@ -214,7 +214,7 @@ class ProductRepositoryImplTest {
         assertThrows(
                 ProductNotFoundException.class,
                 () -> repository(productMapper, mock(ProductGalleryImageMapper.class))
-                        .findPublicationState(productCode)
+                        .queryPublicationState(productCode)
         );
     }
 

@@ -25,8 +25,8 @@ public class StockRepositoryImpl implements StockRepository {
     private final StockReservationMapper reservationMapper;
 
     public StockRepositoryImpl(
-            StockMapper stockMapper,
-            StockReservationMapper reservationMapper
+        StockMapper stockMapper,
+        StockReservationMapper reservationMapper
     ) {
         this.stockMapper = stockMapper;
         this.reservationMapper = reservationMapper;
@@ -34,39 +34,35 @@ public class StockRepositoryImpl implements StockRepository {
 
     @Override
     public void initialize(List<SkuCode> skuCodes) {
-        if (skuCodes.isEmpty()) {
-            return;
-        }
+        if (skuCodes.isEmpty()) return;
+
         var createdAt = LocalDateTime.now();
-        var stockPos = stockMapper.selectSkuTargets(skuCodes).stream()
-                .map(target -> new StockPO()
-                        .setId(UUID7s.generate())
-                        .setSkuId(target.getSkuId())
-                        .setAvailableQuantity(INITIAL_QUANTITY)
-                        .setReservedQuantity(INITIAL_QUANTITY)
-                        .setVersion(INITIAL_VERSION)
-                        .setCreatedAt(createdAt)
-                        .setUpdatedAt(createdAt))
-                .toList();
-        if (stockPos.size() != skuCodes.size()) {
-            throw new IllegalStateException("Not all SKU records were persisted");
-        }
-        stockMapper.insertBatch(stockPos);
+        var stocks = stockMapper.selectSkuCodesWithId(skuCodes).stream()
+            .map(target -> new StockPO()
+                .setId(UUID7s.generate())
+                .setSkuId(target.getSkuId())
+                .setAvailableQuantity(INITIAL_QUANTITY)
+                .setReservedQuantity(INITIAL_QUANTITY)
+                .setVersion(INITIAL_VERSION)
+                .setCreatedAt(createdAt)
+                .setUpdatedAt(createdAt))
+            .toList();
+        stockMapper.insertBatch(stocks);
     }
 
     @Override
     public void reserve(
-            OrderCode orderCode,
-            OffsetDateTime expiresAt,
-            List<ReserveStockItem> items
+        OrderCode orderCode,
+        OffsetDateTime expiresAt,
+        List<ReserveStockItem> items
     ) {
         var targetsBySkuCode = reservationMapper
-                .selectTargetsByOrderCode(orderCode)
-                .stream()
-                .collect(Collectors.toMap(
-                        StockReservationTarget::getSkuCode,
-                        Function.identity()
-                ));
+            .selectTargetsByOrderCode(orderCode)
+            .stream()
+            .collect(Collectors.toMap(
+                StockReservationTarget::getSkuCode,
+                Function.identity()
+            ));
         var reservedAt = LocalDateTime.now();
 
         items.forEach(item -> reserve(item, reservedAt));
@@ -75,9 +71,9 @@ public class StockRepositoryImpl implements StockRepository {
 
     private void reserve(ReserveStockItem item, LocalDateTime reservedAt) {
         var affectedRows = stockMapper.reserve(new ReserveStockCommand(
-                item.skuCode(),
-                item.quantity(),
-                reservedAt
+            item.skuCode(),
+            item.quantity(),
+            reservedAt
         ));
         if (affectedRows == 0) {
             throw new InsufficientStockException(item.skuCode());
@@ -85,50 +81,50 @@ public class StockRepositoryImpl implements StockRepository {
     }
 
     private void insertReservations(
-            List<ReserveStockItem> items,
-            java.util.Map<SkuCode, StockReservationTarget> targetsBySkuCode,
-            OffsetDateTime expiresAt,
-            LocalDateTime reservedAt
+        List<ReserveStockItem> items,
+        java.util.Map<SkuCode, StockReservationTarget> targetsBySkuCode,
+        OffsetDateTime expiresAt,
+        LocalDateTime reservedAt
     ) {
         var reservationPos = items.stream()
-                .map(item -> reservation(
-                        target(item.skuCode(), targetsBySkuCode),
-                        item.quantity(),
-                        expiresAt,
-                        reservedAt
-                ))
-                .toList();
+            .map(item -> reservation(
+                target(item.skuCode(), targetsBySkuCode),
+                item.quantity(),
+                expiresAt,
+                reservedAt
+            ))
+            .toList();
         reservationMapper.insertBatch(reservationPos);
     }
 
     private StockReservationTarget target(
-            SkuCode skuCode,
-            java.util.Map<SkuCode, StockReservationTarget> targetsBySkuCode
+        SkuCode skuCode,
+        java.util.Map<SkuCode, StockReservationTarget> targetsBySkuCode
     ) {
         var target = targetsBySkuCode.get(skuCode);
         if (target == null) {
             throw new IllegalStateException(
-                    "Order item was not persisted for SKU: " + skuCode.value()
+                "Order item was not persisted for SKU: " + skuCode.value()
             );
         }
         return target;
     }
 
     private StockReservationPO reservation(
-            StockReservationTarget target,
-            int quantity,
-            OffsetDateTime expiresAt,
-            LocalDateTime reservedAt
+        StockReservationTarget target,
+        int quantity,
+        OffsetDateTime expiresAt,
+        LocalDateTime reservedAt
     ) {
         return new StockReservationPO()
-                .setId(UUID7s.generate())
-                .setOrderId(target.getOrderId())
-                .setOrderItemId(target.getOrderItemId())
-                .setSkuId(target.getSkuId())
-                .setQuantity((long) quantity)
-                .setStatus(StockReservationStatus.RESERVED)
-                .setExpiresAt(expiresAt.toLocalDateTime())
-                .setCreatedAt(reservedAt)
-                .setUpdatedAt(reservedAt);
+            .setId(UUID7s.generate())
+            .setOrderId(target.getOrderId())
+            .setOrderItemId(target.getOrderItemId())
+            .setSkuId(target.getSkuId())
+            .setQuantity((long) quantity)
+            .setStatus(StockReservationStatus.RESERVED)
+            .setExpiresAt(expiresAt.toLocalDateTime())
+            .setCreatedAt(reservedAt)
+            .setUpdatedAt(reservedAt);
     }
 }

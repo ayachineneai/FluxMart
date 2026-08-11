@@ -12,7 +12,7 @@ public interface ProductRepository {
 
     void update(Product product, long expectedVersion);
 
-    ProductPublicationState findPublicationState(ProductCode productCode);
+    ProductPublicationState queryPublicationState(ProductCode productCode);
 
     long publish(ProductPublication publication, long expectedVersion);
 

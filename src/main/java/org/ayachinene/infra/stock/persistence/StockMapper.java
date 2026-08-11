@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 public interface StockMapper {
 
-    List<SkuStockTarget> selectSkuTargets(List<SkuCode> skuCodes);
+    List<SkuCodeWithId> selectSkuCodesWithId(List<SkuCode> skuCodes);
 
     int insertBatch(List<StockPO> stocks);
 

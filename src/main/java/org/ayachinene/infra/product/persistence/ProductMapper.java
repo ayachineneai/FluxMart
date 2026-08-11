@@ -20,7 +20,7 @@ public interface ProductMapper extends BaseMapper<ProductPO> {
         ), ProductPO::getId);
     }
 
-    default ProductPO selectPublicationStateByProductCode(
+    default ProductPO queryPublicationStateByProductCode(
         ProductCode productCode
     ) {
         return selectOne(

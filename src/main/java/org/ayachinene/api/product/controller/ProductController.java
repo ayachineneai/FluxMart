@@ -3,7 +3,6 @@ package org.ayachinene.api.product.controller;
 import org.ayachinene.api.product.ProductApiMapper;
 import org.ayachinene.api.product.data.CreateProductRequest;
 import org.ayachinene.api.product.data.CreateProductResponse;
-import org.ayachinene.api.product.data.PublishProductRequest;
 import org.ayachinene.api.product.data.PublishProductResponse;
 import org.ayachinene.app.product.ProductService;
 import org.springframework.http.HttpStatus;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,9 +40,9 @@ public class ProductController {
     @PostMapping("/{productCode}/publish")
     public PublishProductResponse publishProduct(
             @PathVariable String productCode,
-            @RequestBody PublishProductRequest request
+            @RequestParam long expectedVersion
     ) {
-        var input = productMapper.toInput(productCode, request);
+        var input = productMapper.toInput(productCode, expectedVersion);
         var result = productService.publishProduct(input);
         return productMapper.toResponse(result);
     }

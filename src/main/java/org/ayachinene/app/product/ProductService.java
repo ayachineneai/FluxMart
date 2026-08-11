@@ -2,6 +2,7 @@ package org.ayachinene.app.product;
 
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.Products;
+import org.ayachinene.app.product.domain.sku.Sku;
 import org.ayachinene.app.product.repository.ProductRepository;
 import org.ayachinene.app.product.creation.CreateProductInput;
 import org.ayachinene.app.product.publication.PublishProductInput;
@@ -36,9 +37,7 @@ public class ProductService {
 
         tx.run(() -> {
             productRepository.create(creation);
-            stockRepository.initialize(creation.skus().stream()
-                    .map(sku -> sku.skuCode())
-                    .toList());
+            stockRepository.initialize(creation.skus().stream().map(Sku::skuCode).toList());
         });
 
         return creation.product().productCode();
@@ -46,12 +45,8 @@ public class ProductService {
 
     public PublishProductResult publishProduct(PublishProductInput input) {
         return tx.run(() -> {
-            var publicationState = productRepository.findPublicationState(
-                    input.productCode()
-            );
-            var hasSku = skuRepository.existsByProductCode(
-                    input.productCode()
-            );
+            var publicationState = productRepository.queryPublicationState(input.productCode());
+            var hasSku = skuRepository.existsByProductCode(input.productCode());
             var publication = Products.publish(
                     publicationState,
                     input.expectedVersion(),

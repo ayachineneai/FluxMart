@@ -1,7 +1,6 @@
 package org.ayachinene.api.product;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
-import org.ayachinene.api.product.data.PublishProductRequest;
 import org.ayachinene.api.product.data.PublishProductResponse;
 import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.app.product.domain.ProductCode;
@@ -10,7 +9,6 @@ import org.ayachinene.app.product.publication.PublishProductInput;
 import org.ayachinene.app.product.publication.PublishProductResult;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.utils.Streams;
-import org.ayachinene.utils.Validates;
 import org.ayachinene.utils.Values;
 import org.springframework.stereotype.Component;
 
@@ -107,11 +105,11 @@ public class ProductApiMapper {
 
     public PublishProductInput toInput(
         String productCode,
-        PublishProductRequest request
+        long expectedVersion
     ) {
         return new PublishProductInput(
             new ProductCode(productCode),
-            Validates.requireNonNull(request.expectedVersion(), "expectedVersion")
+            expectedVersion
         );
     }
 

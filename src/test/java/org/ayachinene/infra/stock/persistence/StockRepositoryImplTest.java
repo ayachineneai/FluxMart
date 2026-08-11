@@ -26,10 +26,10 @@ class StockRepositoryImplTest {
         var stockMapper = mock(StockMapper.class);
         var reservationMapper = mock(StockReservationMapper.class);
         var skuCode = SkuCode.generate();
-        var target = new SkuStockTarget();
+        var target = new SkuCodeWithId();
         target.setSkuId(UUID7s.generate());
         target.setSkuCode(skuCode);
-        when(stockMapper.selectSkuTargets(List.of(skuCode)))
+        when(stockMapper.selectSkuCodesWithId(List.of(skuCode)))
                 .thenReturn(List.of(target));
         var repository = new StockRepositoryImpl(stockMapper, reservationMapper);
 
