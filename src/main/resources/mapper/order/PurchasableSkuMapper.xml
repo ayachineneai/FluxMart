@@ -13,9 +13,9 @@
             product.status AS product_status,
             sku.status AS sku_status,
             product.title AS product_title,
-            specification.id AS specification_id,
+            specification.specification_code,
             specification.name AS specification_name,
-            specification_value.id AS specification_value_id,
+            specification_value.specification_value_code,
             specification_value.display_name AS specification_value_name,
             COALESCE(sku.image_file_id, product.primary_image_file_id) AS image_file_id,
             sku.price_amount

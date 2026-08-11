@@ -8,6 +8,8 @@ import org.ayachinene.app.order.domain.OrderStatus;
 import org.ayachinene.app.order.domain.SpecificationSnapshotItem;
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.sku.SkuCode;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
@@ -27,9 +29,9 @@ class OrderPersistenceConverterTest {
     @Test
     void convertsMoneyTimeAndSpecificationSnapshotRoundTrip() {
         var specification = new SpecificationSnapshotItem(
-                UUID7s.generate(),
+                SpecificationCode.generate(),
                 "颜色",
-                UUID7s.generate(),
+                SpecificationValueCode.generate(),
                 "黑色"
         );
         var item = new OrderItem(

@@ -10,6 +10,7 @@ import org.ayachinene.app.product.creation.ProductCreation;
 import org.ayachinene.app.product.publication.ProductPublication;
 import org.ayachinene.infra.product.persistence.sku.SkuWriter;
 import org.ayachinene.infra.product.persistence.specification.SpecificationWriter;
+import org.ayachinene.infra.product.persistence.specification.SpecificationPersistenceIds;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.product.persistence.converter.ProductPersistenceConverter;
@@ -19,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,6 +42,9 @@ class ProductRepositoryImplTest {
         var specificationWriter = mock(SpecificationWriter.class);
         var skuWriter = mock(SkuWriter.class);
         when(productMapper.insert(any(ProductPO.class))).thenReturn(1);
+        var specificationIds = new SpecificationPersistenceIds(Map.of(), Map.of());
+        when(specificationWriter.insert(any(), any(), any()))
+                .thenReturn(specificationIds);
 
         var firstImage = UUID7s.generate();
         var secondImage = UUID7s.generate();
@@ -88,6 +93,7 @@ class ProductRepositoryImplTest {
         verify(skuWriter).insert(
                 eq(savedProduct.getId()),
                 eq(List.of()),
+                eq(specificationIds),
                 eq(savedProduct.getCreatedAt())
         );
     }

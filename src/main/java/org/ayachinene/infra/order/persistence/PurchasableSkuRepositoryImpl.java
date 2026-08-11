@@ -58,11 +58,11 @@ public class PurchasableSkuRepositoryImpl implements PurchasableSkuRepository {
             List<PurchasableSkuRow> rows
     ) {
         return rows.stream()
-                .filter(row -> row.getSpecificationId() != null)
+                .filter(row -> row.getSpecificationCode() != null)
                 .map(row -> new SpecificationSnapshotItem(
-                        row.getSpecificationId(),
+                        row.getSpecificationCode(),
                         row.getSpecificationName(),
-                        row.getSpecificationValueId(),
+                        row.getSpecificationValueCode(),
                         row.getSpecificationValueName()
                 ))
                 .toList();

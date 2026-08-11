@@ -52,12 +52,12 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         insertProduct(newProductId, product, createdAt);
         insertGalleryImages(newProductId, product.galleryImageFileIds(), createdAt);
-        specificationWriter.insert(
+        var specificationIds = specificationWriter.insert(
             newProductId,
             creation.specifications(),
             createdAt
         );
-        skuWriter.insert(newProductId, creation.skus(), createdAt);
+        skuWriter.insert(newProductId, creation.skus(), specificationIds, createdAt);
     }
 
     private void insertProduct(UUID7 newProductId, Product product, LocalDateTime createdAt) {

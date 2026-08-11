@@ -14,14 +14,14 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface SpecificationPersistenceConverter {
 
-    @Mapping(target = "id", source = "specificationId")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "productId", ignore = true)
     @Mapping(target = "sortOrder", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     SpecificationPO toSpecificationPo(Specification specification);
 
-    @Mapping(target = "id", source = "specificationValueId")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "specificationId", ignore = true)
     @Mapping(target = "sortOrder", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

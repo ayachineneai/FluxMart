@@ -27,24 +27,6 @@ public class ProductApiMapper {
         );
     }
 
-    public PublishProductInput toInput(
-        String productCode,
-        PublishProductRequest request
-    ) {
-        return new PublishProductInput(
-            new ProductCode(productCode),
-            Validates.requireNonNull(request.expectedVersion(), "expectedVersion")
-        );
-    }
-
-    public PublishProductResponse toResponse(PublishProductResult result) {
-        return new PublishProductResponse(
-            result.productCode().value(),
-            result.status().name(),
-            result.version()
-        );
-    }
-
     private ProductInput product(CreateProductRequest request) {
         return new ProductInput(
             request.title(),
@@ -120,6 +102,24 @@ public class ProductApiMapper {
         return Values.map(
             request,
             value -> new SelectionInput(value.specification(), value.value())
+        );
+    }
+
+    public PublishProductInput toInput(
+        String productCode,
+        PublishProductRequest request
+    ) {
+        return new PublishProductInput(
+            new ProductCode(productCode),
+            Validates.requireNonNull(request.expectedVersion(), "expectedVersion")
+        );
+    }
+
+    public PublishProductResponse toResponse(PublishProductResult result) {
+        return new PublishProductResponse(
+            result.productCode().value(),
+            result.status().name(),
+            result.version()
         );
     }
 

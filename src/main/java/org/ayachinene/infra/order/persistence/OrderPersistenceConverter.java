@@ -4,8 +4,9 @@ import org.ayachinene.app.domain.money.Money;
 import org.ayachinene.app.order.domain.Order;
 import org.ayachinene.app.order.domain.OrderItem;
 import org.ayachinene.app.order.domain.SpecificationSnapshotItem;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.infra.exception.UncheckedException;
-import org.ayachinene.shared.uuid7.UUID7;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
@@ -107,26 +108,26 @@ public class OrderPersistenceConverter {
     }
 
     private record SnapshotJson(
-            String specificationId,
+            String specificationCode,
             String specificationName,
-            String specificationValueId,
+            String specificationValueCode,
             String specificationValueName
     ) {
 
         private static SnapshotJson from(SpecificationSnapshotItem item) {
             return new SnapshotJson(
-                    item.specificationId().toString(),
+                    item.specificationCode().value(),
                     item.specificationName(),
-                    item.specificationValueId().toString(),
+                    item.specificationValueCode().value(),
                     item.specificationValueName()
             );
         }
 
         private SpecificationSnapshotItem toSnapshot() {
             return new SpecificationSnapshotItem(
-                    UUID7.fromString(specificationId, "specificationId"),
+                    new SpecificationCode(specificationCode),
                     specificationName,
-                    UUID7.fromString(specificationValueId, "specificationValueId"),
+                    new SpecificationValueCode(specificationValueCode),
                     specificationValueName
             );
         }

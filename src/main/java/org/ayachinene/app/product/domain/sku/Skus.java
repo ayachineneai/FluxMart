@@ -56,8 +56,8 @@ public final class Skus {
         );
         var value = requireValue(specification, input.value());
         return new SpecificationSelection(
-                specification.specificationId(),
-                value.specificationValueId()
+                specification.specificationCode(),
+                value.specificationValueCode()
         );
     }
 

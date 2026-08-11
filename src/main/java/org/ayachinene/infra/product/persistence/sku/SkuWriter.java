@@ -2,6 +2,7 @@ package org.ayachinene.infra.product.persistence.sku;
 
 import org.ayachinene.app.product.domain.sku.Sku;
 import org.ayachinene.infra.product.persistence.converter.SkuPersistenceConverter;
+import org.ayachinene.infra.product.persistence.specification.SpecificationPersistenceIds;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.springframework.stereotype.Repository;
@@ -31,12 +32,13 @@ public class SkuWriter {
     public void insert(
             UUID7 productId,
             List<Sku> skus,
+            SpecificationPersistenceIds specificationIds,
             LocalDateTime createdAt
     ) {
         if (skus.isEmpty()) return;
 
         var skuItems = assignIds(skus);
-        var selectionPos = toSelectionPos(skuItems, createdAt);
+        var selectionPos = toSelectionPos(skuItems, specificationIds, createdAt);
 
         skuMapper.insertBatch(toSkuPos(productId, skuItems, createdAt));
         if (!selectionPos.isEmpty()) {
@@ -52,6 +54,7 @@ public class SkuWriter {
 
     private List<SkuSpecificationSelectionPO> toSelectionPos(
         List<SkuWithId> skus,
+        SpecificationPersistenceIds specificationIds,
         LocalDateTime createdAt
     ) {
         return skus.stream()
@@ -59,6 +62,12 @@ public class SkuWriter {
                 .map(selection -> persistenceConverter.toSelectionPo(selection)
                     .setId(UUID7s.generate())
                     .setSkuId(item.skuId())
+                    .setSpecificationId(specificationIds.specificationId(
+                            selection.specificationCode()
+                    ))
+                    .setSpecificationValueId(specificationIds.specificationValueId(
+                            selection.specificationValueCode()
+                    ))
                     .setCreatedAt(createdAt)
                 )
             )

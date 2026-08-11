@@ -1,9 +1,10 @@
 package org.ayachinene.app.product.domain.sku;
 
-import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 
 public record SpecificationSelection(
-        UUID7 specificationId,
-        UUID7 specificationValueId
+        SpecificationCode specificationCode,
+        SpecificationValueCode specificationValueCode
 ) {
 }

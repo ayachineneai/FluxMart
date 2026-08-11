@@ -18,7 +18,7 @@ public record Sku(
     public Sku {
         specificationSelections = List.copyOf(specificationSelections);
         var uniqueSpecificationCount = specificationSelections.stream()
-                .map(SpecificationSelection::specificationId)
+                .map(SpecificationSelection::specificationCode)
                 .distinct()
                 .count();
         if (uniqueSpecificationCount != specificationSelections.size()) {

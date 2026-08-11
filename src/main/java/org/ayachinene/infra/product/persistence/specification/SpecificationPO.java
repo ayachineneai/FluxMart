@@ -2,6 +2,7 @@ package org.ayachinene.infra.product.persistence.specification;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.ayachinene.app.product.domain.specification.SpecificationStatus;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
 import org.ayachinene.shared.uuid7.UUID7;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ public class SpecificationPO {
 
     private UUID7 id;
     private UUID7 productId;
+    private SpecificationCode specificationCode;
     private String name;
     private SpecificationStatus status;
     private Integer sortOrder;
@@ -28,6 +30,15 @@ public class SpecificationPO {
 
     public UUID7 getProductId() {
         return productId;
+    }
+
+    public SpecificationCode getSpecificationCode() {
+        return specificationCode;
+    }
+
+    public SpecificationPO setSpecificationCode(SpecificationCode specificationCode) {
+        this.specificationCode = specificationCode;
+        return this;
     }
 
     public SpecificationPO setProductId(UUID7 productId) {

@@ -25,6 +25,8 @@ public interface SkuPersistenceConverter {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "skuId", ignore = true)
+    @Mapping(target = "specificationId", ignore = true)
+    @Mapping(target = "specificationValueId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     SkuSpecificationSelectionPO toSelectionPo(SpecificationSelection selection);
 

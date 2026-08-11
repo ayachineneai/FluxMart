@@ -4,6 +4,8 @@ import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.ProductStatus;
 import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.app.product.domain.sku.SkuStatus;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.shared.uuid7.UUID7;
 
 public class PurchasableSkuRow {
@@ -14,9 +16,9 @@ public class PurchasableSkuRow {
     private ProductStatus productStatus;
     private SkuStatus skuStatus;
     private String productTitle;
-    private UUID7 specificationId;
+    private SpecificationCode specificationCode;
     private String specificationName;
-    private UUID7 specificationValueId;
+    private SpecificationValueCode specificationValueCode;
     private String specificationValueName;
     private UUID7 imageFileId;
     private Long priceAmount;
@@ -69,12 +71,12 @@ public class PurchasableSkuRow {
         this.productTitle = productTitle;
     }
 
-    public UUID7 getSpecificationId() {
-        return specificationId;
+    public SpecificationCode getSpecificationCode() {
+        return specificationCode;
     }
 
-    public void setSpecificationId(UUID7 specificationId) {
-        this.specificationId = specificationId;
+    public void setSpecificationCode(SpecificationCode specificationCode) {
+        this.specificationCode = specificationCode;
     }
 
     public String getSpecificationName() {
@@ -85,12 +87,14 @@ public class PurchasableSkuRow {
         this.specificationName = specificationName;
     }
 
-    public UUID7 getSpecificationValueId() {
-        return specificationValueId;
+    public SpecificationValueCode getSpecificationValueCode() {
+        return specificationValueCode;
     }
 
-    public void setSpecificationValueId(UUID7 specificationValueId) {
-        this.specificationValueId = specificationValueId;
+    public void setSpecificationValueCode(
+            SpecificationValueCode specificationValueCode
+    ) {
+        this.specificationValueCode = specificationValueCode;
     }
 
     public String getSpecificationValueName() {

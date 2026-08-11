@@ -5,7 +5,8 @@ import org.ayachinene.app.product.domain.sku.Sku;
 import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.app.product.domain.sku.SkuStatus;
 import org.ayachinene.app.product.domain.sku.SpecificationSelection;
-import org.ayachinene.shared.uuid7.UUID7s;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.app.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,7 @@ class SkuTest {
 
     @Test
     void rejectsTwoValuesForTheSameSpecification() {
-        var specificationId = UUID7s.generate();
+        var specificationCode = SpecificationCode.generate();
 
         assertThrows(ValidationException.class, () -> new Sku(
                 SkuCode.generate(),
@@ -46,12 +47,12 @@ class SkuTest {
                 null,
                 List.of(
                         new SpecificationSelection(
-                                specificationId,
-                                UUID7s.generate()
+                                specificationCode,
+                                SpecificationValueCode.generate()
                         ),
                         new SpecificationSelection(
-                                specificationId,
-                                UUID7s.generate()
+                                specificationCode,
+                                SpecificationValueCode.generate()
                         )
                 )
         ));
@@ -59,8 +60,8 @@ class SkuTest {
 
     private static SpecificationSelection selection() {
         return new SpecificationSelection(
-                UUID7s.generate(),
-                UUID7s.generate()
+                SpecificationCode.generate(),
+                SpecificationValueCode.generate()
         );
     }
 }

@@ -5,6 +5,9 @@ import org.ayachinene.app.product.domain.sku.Sku;
 import org.ayachinene.app.product.domain.sku.SkuCode;
 import org.ayachinene.app.product.domain.sku.SkuStatus;
 import org.ayachinene.app.product.domain.sku.SpecificationSelection;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
+import org.ayachinene.infra.product.persistence.specification.SpecificationPersistenceIds;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.product.persistence.converter.SkuPersistenceConverter;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,9 +34,17 @@ class SkuWriterTest {
         var productId = UUID7s.generate();
         var createdAt = LocalDateTime.now();
 
+        var specificationCode = SpecificationCode.generate();
+        var specificationValueCode = SpecificationValueCode.generate();
         var selection = new SpecificationSelection(
-                UUID7s.generate(),
-                UUID7s.generate()
+                specificationCode,
+                specificationValueCode
+        );
+        var specificationId = UUID7s.generate();
+        var specificationValueId = UUID7s.generate();
+        var specificationIds = new SpecificationPersistenceIds(
+                Map.of(specificationCode, specificationId),
+                Map.of(specificationValueCode, specificationValueId)
         );
         var sku = new Sku(
                 SkuCode.generate(),
@@ -47,7 +59,7 @@ class SkuWriterTest {
                 skuMapper,
                 selectionMapper,
                 Mappers.getMapper(SkuPersistenceConverter.class)
-        ).insert(productId, List.of(sku), createdAt);
+        ).insert(productId, List.of(sku), specificationIds, createdAt);
 
         var skuCaptor = ArgumentCaptor.forClass(List.class);
         verify(skuMapper).insertBatch(skuCaptor.capture());
@@ -65,10 +77,7 @@ class SkuWriterTest {
                 .getValue()
                 .getFirst();
         assertEquals(savedSku.getId(), savedSelection.getSkuId());
-        assertEquals(selection.specificationId(), savedSelection.getSpecificationId());
-        assertEquals(
-                selection.specificationValueId(),
-                savedSelection.getSpecificationValueId()
-        );
+        assertEquals(specificationId, savedSelection.getSpecificationId());
+        assertEquals(specificationValueId, savedSelection.getSpecificationValueId());
     }
 }

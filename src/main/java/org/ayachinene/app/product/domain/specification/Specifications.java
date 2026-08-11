@@ -1,8 +1,6 @@
 package org.ayachinene.app.product.domain.specification;
 
 import org.ayachinene.app.product.creation.SpecificationInput;
-import org.ayachinene.shared.uuid7.UUID7s;
-
 import java.util.List;
 
 public final class Specifications {
@@ -20,7 +18,7 @@ public final class Specifications {
 
     private static Specification createSpecification(SpecificationInput input) {
         return new Specification(
-                UUID7s.generate(),
+                SpecificationCode.generate(),
                 input.name(),
                 SpecificationStatus.ENABLED,
                 input.values().stream()
@@ -31,7 +29,7 @@ public final class Specifications {
 
     private static SpecificationValue createSpecificationValue(String displayName) {
         return new SpecificationValue(
-                UUID7s.generate(),
+                SpecificationValueCode.generate(),
                 displayName,
                 SpecificationStatus.ENABLED
         );

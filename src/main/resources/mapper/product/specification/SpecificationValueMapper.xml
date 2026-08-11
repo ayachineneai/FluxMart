@@ -9,6 +9,7 @@
         (
             id,
             specification_id,
+            specification_value_code,
             display_name,
             status,
             sort_order,
@@ -20,6 +21,7 @@
             (
                 #{value.id},
                 #{value.specificationId},
+                #{value.specificationValueCode},
                 #{value.displayName},
                 #{value.status},
                 #{value.sortOrder},

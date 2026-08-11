@@ -5,6 +5,8 @@ import org.ayachinene.app.product.domain.CategoryCode;
 import org.ayachinene.app.order.domain.OrderCode;
 import org.ayachinene.app.product.domain.ProductCode;
 import org.ayachinene.app.product.domain.sku.SkuCode;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
@@ -66,6 +68,32 @@ class DomainValueTypeHandlerTest {
         assertEquals(
                 orderCode,
                 new OrderCodeTypeHandler().getNullableResult(resultSet, "value")
+        );
+    }
+
+    @Test
+    void mapsSpecificationCodesToVarchar() throws Exception {
+        var specificationCode = SpecificationCode.generate();
+        var valueCode = SpecificationValueCode.generate();
+        var resultSet = mock(ResultSet.class);
+        when(resultSet.getString("specification_code"))
+                .thenReturn(specificationCode.value());
+        when(resultSet.getString("specification_value_code"))
+                .thenReturn(valueCode.value());
+
+        assertEquals(
+                specificationCode,
+                new SpecificationCodeTypeHandler().getNullableResult(
+                        resultSet,
+                        "specification_code"
+                )
+        );
+        assertEquals(
+                valueCode,
+                new SpecificationValueCodeTypeHandler().getNullableResult(
+                        resultSet,
+                        "specification_value_code"
+                )
         );
     }
 

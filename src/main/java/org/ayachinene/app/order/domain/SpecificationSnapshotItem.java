@@ -1,11 +1,12 @@
 package org.ayachinene.app.order.domain;
 
-import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 
 public record SpecificationSnapshotItem(
-        UUID7 specificationId,
+        SpecificationCode specificationCode,
         String specificationName,
-        UUID7 specificationValueId,
+        SpecificationValueCode specificationValueCode,
         String specificationValueName
 ) {
 }

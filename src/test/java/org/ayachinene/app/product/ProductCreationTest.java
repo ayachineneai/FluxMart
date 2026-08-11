@@ -48,7 +48,13 @@ class ProductCreationTest {
 
         assertEquals(SpecificationStatus.ENABLED, specification.status());
         assertEquals(SkuStatus.ENABLED, sku.status());
-        assertEquals(specification.specificationId(), selection.specificationId());
-        assertEquals(value.specificationValueId(), selection.specificationValueId());
+        assertEquals(
+                specification.specificationCode(),
+                selection.specificationCode()
+        );
+        assertEquals(
+                value.specificationValueCode(),
+                selection.specificationValueCode()
+        );
     }
 }

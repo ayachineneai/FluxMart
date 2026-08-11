@@ -97,6 +97,11 @@ CREATE TABLE IF NOT EXISTS product_specification
     id                     BINARY(16)    COMMENT 'UUIDv7 数据库内部主键',
     product_id             BINARY(16)    COMMENT '所属商品主键',
 
+    specification_code     VARCHAR(24)
+                           CHARACTER SET ascii
+                           COLLATE ascii_bin
+                           COMMENT '系统生成的规格业务编号，区分大小写',
+
     name                   VARCHAR(50)   COMMENT '规格名称，例如颜色、尺码',
     status                 VARCHAR(20)   COMMENT '启用-ENABLED、停用-DISABLED',
     sort_order             INT UNSIGNED  COMMENT '从 0 开始的展示顺序',
@@ -105,6 +110,7 @@ CREATE TABLE IF NOT EXISTS product_specification
     updated_at             DATETIME(3)   COMMENT '最后修改时间',
 
     PRIMARY KEY (id),
+    UNIQUE KEY uk_specification_code (specification_code),
     KEY idx_product_id (product_id)
 ) COMMENT = '商品销售规格';
 
@@ -114,6 +120,11 @@ CREATE TABLE IF NOT EXISTS product_specification_value
     id                       BINARY(16)    COMMENT 'UUIDv7 数据库内部主键',
     specification_id         BINARY(16)    COMMENT '所属销售规格内部主键',
 
+    specification_value_code VARCHAR(24)
+                             CHARACTER SET ascii
+                             COLLATE ascii_bin
+                             COMMENT '系统生成的规格值业务编号，区分大小写',
+
     display_name             VARCHAR(50)   COMMENT '展示名称，例如黑色、白色、M、L',
     status                   VARCHAR(20)   COMMENT '启用-ENABLED、停用-DISABLED',
     sort_order               INT UNSIGNED  COMMENT '从 0 开始的展示顺序',
@@ -122,6 +133,7 @@ CREATE TABLE IF NOT EXISTS product_specification_value
     updated_at               DATETIME(3)   COMMENT '最后修改时间',
 
     PRIMARY KEY (id),
+    UNIQUE KEY uk_specification_value_code (specification_value_code),
     KEY idx_specification_id (specification_id)
 ) COMMENT = '商品销售规格值';
 

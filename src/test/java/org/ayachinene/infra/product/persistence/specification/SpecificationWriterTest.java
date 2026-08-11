@@ -2,7 +2,9 @@ package org.ayachinene.infra.product.persistence.specification;
 
 import org.ayachinene.app.product.domain.specification.Specification;
 import org.ayachinene.app.product.domain.specification.SpecificationStatus;
+import org.ayachinene.app.product.domain.specification.SpecificationCode;
 import org.ayachinene.app.product.domain.specification.SpecificationValue;
+import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.infra.product.persistence.converter.SpecificationPersistenceConverter;
 import org.junit.jupiter.api.Test;
@@ -29,13 +31,13 @@ class SpecificationWriterTest {
         var black = value("黑色");
         var white = value("白色");
         var specification = new Specification(
-                UUID7s.generate(),
+                SpecificationCode.generate(),
                 "颜色",
                 SpecificationStatus.ENABLED,
                 List.of(black, white)
         );
 
-        new SpecificationWriter(
+        var ids = new SpecificationWriter(
                 specificationMapper,
                 valueMapper,
                 Mappers.getMapper(SpecificationPersistenceConverter.class)
@@ -44,7 +46,14 @@ class SpecificationWriterTest {
         var specificationCaptor = ArgumentCaptor.forClass(List.class);
         verify(specificationMapper).insertBatch(specificationCaptor.capture());
         var savedSpecification = (SpecificationPO) specificationCaptor.getValue().getFirst();
-        assertEquals(specification.specificationId(), savedSpecification.getId());
+        assertEquals(
+                specification.specificationCode(),
+                savedSpecification.getSpecificationCode()
+        );
+        assertEquals(
+                ids.specificationId(specification.specificationCode()),
+                savedSpecification.getId()
+        );
         assertEquals(productId, savedSpecification.getProductId());
         assertEquals(0, savedSpecification.getSortOrder());
         assertEquals(createdAt, savedSpecification.getCreatedAt());
@@ -54,15 +63,23 @@ class SpecificationWriterTest {
         var savedValues = valueCaptor.getValue();
         var savedBlack = (SpecificationValuePO) savedValues.get(0);
         var savedWhite = (SpecificationValuePO) savedValues.get(1);
-        assertEquals(black.specificationValueId(), savedBlack.getId());
+        assertEquals(black.specificationValueCode(), savedBlack.getSpecificationValueCode());
+        assertEquals(
+                ids.specificationValueId(black.specificationValueCode()),
+                savedBlack.getId()
+        );
         assertEquals(0, savedBlack.getSortOrder());
-        assertEquals(white.specificationValueId(), savedWhite.getId());
+        assertEquals(white.specificationValueCode(), savedWhite.getSpecificationValueCode());
+        assertEquals(
+                ids.specificationValueId(white.specificationValueCode()),
+                savedWhite.getId()
+        );
         assertEquals(1, savedWhite.getSortOrder());
     }
 
     private static SpecificationValue value(String displayName) {
         return new SpecificationValue(
-                UUID7s.generate(),
+                SpecificationValueCode.generate(),
                 displayName,
                 SpecificationStatus.ENABLED
         );
