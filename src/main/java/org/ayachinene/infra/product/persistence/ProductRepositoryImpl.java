@@ -22,24 +22,28 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductMapper productMapper;
     private final ProductGalleryImageMapper galleryImageMapper;
-    private final ProductCreationWriter creationWriter;
+    private final ProductCreationPersistenceConverter creationConverter;
+    private final ProductCreationPersistenceInserter creationInserter;
     private final ProductPersistenceConverter persistenceConverter;
 
     public ProductRepositoryImpl(
         ProductMapper productMapper,
         ProductGalleryImageMapper galleryImageMapper,
-        ProductCreationWriter creationWriter,
+        ProductCreationPersistenceConverter creationConverter,
+        ProductCreationPersistenceInserter creationInserter,
         ProductPersistenceConverter persistenceConverter
     ) {
         this.productMapper = productMapper;
         this.galleryImageMapper = galleryImageMapper;
-        this.creationWriter = creationWriter;
+        this.creationConverter = creationConverter;
+        this.creationInserter = creationInserter;
         this.persistenceConverter = persistenceConverter;
     }
 
     @Override
     public void create(ProductCreation creation) {
-        creationWriter.insert(creation);
+        var pos = creationConverter.toPos(creation);
+        creationInserter.insert(pos);
     }
 
     private void insertGalleryImages(

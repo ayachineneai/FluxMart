@@ -9,83 +9,40 @@ import org.ayachinene.app.product.domain.specification.SpecificationValueCode;
 import org.ayachinene.infra.product.persistence.converter.ProductPersistenceConverter;
 import org.ayachinene.infra.product.persistence.converter.SkuPersistenceConverter;
 import org.ayachinene.infra.product.persistence.converter.SpecificationPersistenceConverter;
-import org.ayachinene.infra.product.persistence.sku.SkuMapper;
 import org.ayachinene.infra.product.persistence.sku.SkuPO;
-import org.ayachinene.infra.product.persistence.sku.SkuSpecificationSelectionMapper;
 import org.ayachinene.infra.product.persistence.sku.SkuSpecificationSelectionPO;
-import org.ayachinene.infra.product.persistence.specification.SpecificationMapper;
 import org.ayachinene.infra.product.persistence.specification.SpecificationPO;
-import org.ayachinene.infra.product.persistence.specification.SpecificationValueMapper;
 import org.ayachinene.infra.product.persistence.specification.SpecificationValuePO;
 import org.ayachinene.shared.uuid7.UUID7;
 import org.ayachinene.shared.uuid7.UUID7s;
 import org.ayachinene.utils.Streams;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Repository
-public class ProductCreationWriter {
+@Component
+public class ProductCreationPersistenceConverter {
 
     private static final long INITIAL_VERSION = 0L;
 
-    private final ProductMapper productMapper;
-    private final ProductGalleryImageMapper galleryImageMapper;
-    private final SpecificationMapper specificationMapper;
-    private final SpecificationValueMapper specificationValueMapper;
-    private final SkuMapper skuMapper;
-    private final SkuSpecificationSelectionMapper selectionMapper;
     private final ProductPersistenceConverter productConverter;
     private final SpecificationPersistenceConverter specificationConverter;
     private final SkuPersistenceConverter skuConverter;
 
-    public ProductCreationWriter(
-            ProductMapper productMapper,
-            ProductGalleryImageMapper galleryImageMapper,
-            SpecificationMapper specificationMapper,
-            SpecificationValueMapper specificationValueMapper,
-            SkuMapper skuMapper,
-            SkuSpecificationSelectionMapper selectionMapper,
+    public ProductCreationPersistenceConverter(
             ProductPersistenceConverter productConverter,
             SpecificationPersistenceConverter specificationConverter,
             SkuPersistenceConverter skuConverter
     ) {
-        this.productMapper = productMapper;
-        this.galleryImageMapper = galleryImageMapper;
-        this.specificationMapper = specificationMapper;
-        this.specificationValueMapper = specificationValueMapper;
-        this.skuMapper = skuMapper;
-        this.selectionMapper = selectionMapper;
         this.productConverter = productConverter;
         this.specificationConverter = specificationConverter;
         this.skuConverter = skuConverter;
     }
 
-    public void insert(ProductCreation creation) {
-        var rows = prepareRows(creation);
-
-        productMapper.insert(rows.product());
-        if (!rows.galleryImages().isEmpty()) {
-            galleryImageMapper.insertBatch(rows.galleryImages());
-        }
-        if (!rows.specifications().isEmpty()) {
-            specificationMapper.insertBatch(rows.specifications());
-        }
-        if (!rows.specificationValues().isEmpty()) {
-            specificationValueMapper.insertBatch(rows.specificationValues());
-        }
-        if (!rows.skus().isEmpty()) {
-            skuMapper.insertBatch(rows.skus());
-        }
-        if (!rows.selections().isEmpty()) {
-            selectionMapper.insertBatch(rows.selections());
-        }
-    }
-
-    private ProductCreationRows prepareRows(ProductCreation creation) {
+    public ProductCreationPOs toPos(ProductCreation creation) {
         var productId = UUID7s.generate();
         var createdAt = LocalDateTime.now();
         var specificationIds = specificationIds(creation.specifications());
@@ -94,7 +51,7 @@ public class ProductCreationWriter {
         );
         var skuIds = skuIds(creation.skus());
 
-        return new ProductCreationRows(
+        return new ProductCreationPOs(
                 product(creation, productId, createdAt),
                 galleryImages(creation, productId, createdAt),
                 specifications(
@@ -274,15 +231,5 @@ public class ProductCreationWriter {
             throw new IllegalStateException("Missing persistence ID for code: " + code);
         }
         return id;
-    }
-
-    private record ProductCreationRows(
-            ProductPO product,
-            List<ProductGalleryImagePO> galleryImages,
-            List<SpecificationPO> specifications,
-            List<SpecificationValuePO> specificationValues,
-            List<SkuPO> skus,
-            List<SkuSpecificationSelectionPO> selections
-    ) {
     }
 }

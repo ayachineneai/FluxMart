@@ -31,20 +31,25 @@ import static org.mockito.Mockito.when;
 class ProductRepositoryImplTest {
 
     @Test
-    void delegatesProductCreationToWriter() {
+    void convertsAndInsertsProductCreation() {
         var productMapper = mock(ProductMapper.class);
         var galleryMapper = mock(ProductGalleryImageMapper.class);
-        var creationWriter = mock(ProductCreationWriter.class);
+        var creationConverter = mock(ProductCreationPersistenceConverter.class);
+        var creationInserter = mock(ProductCreationPersistenceInserter.class);
         var creation = mock(ProductCreation.class);
+        var pos = mock(ProductCreationPOs.class);
+        when(creationConverter.toPos(creation)).thenReturn(pos);
 
         new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                creationWriter,
+                creationConverter,
+                creationInserter,
                 Mappers.getMapper(ProductPersistenceConverter.class)
         ).create(creation);
 
-        verify(creationWriter).insert(creation);
+        verify(creationConverter).toPos(creation);
+        verify(creationInserter).insert(pos);
     }
 
     @Test
@@ -187,7 +192,8 @@ class ProductRepositoryImplTest {
         return new ProductRepositoryImpl(
                 productMapper,
                 galleryMapper,
-                mock(ProductCreationWriter.class),
+                mock(ProductCreationPersistenceConverter.class),
+                mock(ProductCreationPersistenceInserter.class),
                 Mappers.getMapper(ProductPersistenceConverter.class)
         );
     }
