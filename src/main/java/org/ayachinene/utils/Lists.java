@@ -11,6 +11,10 @@ public final class Lists {
     private Lists() {
     }
 
+    public static <T> boolean notEmpty(List<T> ts) {
+        return ts != null && !ts.isEmpty();
+    }
+
     public static <T> List<T> nullToEmpty(List<T> ts) {
         return ts == null ? List.of() : ts;
     }

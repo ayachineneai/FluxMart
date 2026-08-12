@@ -48,11 +48,29 @@ public final class Validates {
         String message
     ) {
         var normalized = Lists.nullToEmpty(values);
-        require(Streams.of(normalized).allMatch(predicate), message);
+        require(Streams.of(values).allMatch(predicate), message);
         return normalized;
     }
 
-    public static <T> List<T> notDuplicated(List<T> values, String message) {
+    public static <T> List<T> list(List<T> values, String field) {
+        require(Lists.notEmpty(values), field + " must not be empty");
+        return values;
+    }
+
+    public static <T> List<T> list(
+        List<T> values,
+        Predicate<T> predicate,
+        String field
+    ) {
+        var required = list(values, field);
+        require(
+            Streams.of(required).allMatch(predicate),
+            field + " contains invalid element"
+        );
+        return required;
+    }
+
+    public static <T> List<T> unique(List<T> values, String message) {
         require(Lists.distinct(values).size() == values.size(), message);
         return values;
     }

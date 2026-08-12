@@ -2,6 +2,7 @@ package org.ayachinene.app.product.creation;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
 import org.ayachinene.utils.Streams;
+import org.ayachinene.utils.Validates;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public final class ProductValidator {
         var specifications = Streams.withIndex(requests)
             .map(x -> validateSpecification(x.value(), x.index()))
             .toList();
-        notDuplicated(
+        unique(
             Streams.of(specifications)
                 .map(CreateProductRequest.SpecificationRequest::name)
                 .toList(),
@@ -48,31 +49,21 @@ public final class ProductValidator {
     ) {
         var field = "specifications[" + index + "]";
         notNull(request, field);
+        var name = text(request.name(), field + ".name", 50);
         return new CreateProductRequest.SpecificationRequest(
-            text(request.name(), field + ".name", 50),
-            validateSpecificationValues(request.values(), field)
+            name,
+            validateSpecificationValues(request.values(), name)
         );
     }
 
     private static List<String> validateSpecificationValues(
         List<String> values,
-        String specificationField
+        String specificationName
     ) {
-        require(
-            values != null && !values.isEmpty(),
-            specificationField + ".values must not be empty"
-        );
-        var validated = Streams.withIndex(values)
-            .map(x -> text(
-                x.value(),
-                specificationField + ".values[" + x.index() + "]",
-                50
-            ))
+        var field = "specifications[" + specificationName + "].values";
+        var normalized = list(uniqueNonNull(values), field);
+        return Streams.withIndex(normalized)
+            .map(x -> text(x.value(), field + "[" + x.index() + "]", 50))
             .toList();
-        notDuplicated(
-            validated,
-            specificationField + ".values must not contain duplicates"
-        );
-        return validated;
     }
 }
