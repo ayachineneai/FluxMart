@@ -29,37 +29,30 @@ public final class ProductValidator {
             text(64).v(request.categoryCode(), "categoryCode"),
             notNull(request.primaryImageFileId(), "primaryImageFileId"),
             // 校验轮播图 ID 非空且不重复
-            ListValidators.<UUID7>nullAsEmpty()
-                .c(each(Validators::notNull))
-                .c(unique())
-                .v(request.galleryImageFileIds(), "galleryImageFileIds"),
+            ListValidators.<UUID7>nullAsEmpty().c(each(Validators::notNull)).c(unique()).v(request.galleryImageFileIds(), "galleryImageFileIds"),
             // 校验规格名称及其可选值
             ListValidators.<CreateProductRequest.SpecificationRequest>nullAsEmpty()
                 .c(each((specification, field) -> {
                     notNull(specification, field);
                     return new CreateProductRequest.SpecificationRequest(
                         text(50).v(specification.name(), field + ".name"),
-                        each(text(50))
-                            .c(notEmpty())
-                            .c(unique())
-                            .v(specification.values(), field + ".values")
+                        each(text(50)).c(notEmpty()).c(unique()).v(specification.values(), field + ".values")
                     );
-                }))
-                .c(unique(CreateProductRequest.SpecificationRequest::name))
+                })).c(unique(CreateProductRequest.SpecificationRequest::name))
                 .v(request.specifications(), "specifications"),
             // 校验 SKU 基础字段和价格，选择项仅规范化为空列表
             ListValidators.<CreateProductRequest.SkuRequest>nullAsEmpty()
                 .c(each((sku, field) -> {
                     notNull(sku, field);
-                    return new CreateProductRequest.SkuRequest(whenPresent(text(64)).v(sku.merchantSkuCode(), field + ".merchantSkuCode"),
+                    return new CreateProductRequest.SkuRequest(
+                        whenPresent(text(64)).v(sku.merchantSkuCode(), field + ".merchantSkuCode"),
                         AmountValidators.positive().c(AmountValidators.range(BigDecimal.ZERO, new BigDecimal("99999999.99")))
                             .c(AmountValidators.maxFractionDigits(2))
                             .v(notNull(sku.price(), field + ".price"), field + ".price"),
                         sku.imageFileId(),
                         ListValidators.<CreateProductRequest.SelectionRequest>nullAsEmpty().v(sku.selections(), field + ".selections")
                     );
-                }))
-                .c(notEmpty())
+                })).c(notEmpty())
                 .v(request.skus(), "skus")
         );
     }
