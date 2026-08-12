@@ -24,6 +24,10 @@ public final class Values {
         return Option.of(value).filter(predicate::apply);
     }
 
+    public static void guard(boolean condition, Runnable action) {
+        if (condition) action.run();
+    }
+
     public static <T> boolean notIn(Set<? extends T> values, T value) {
         return values == null || !values.contains(value);
     }

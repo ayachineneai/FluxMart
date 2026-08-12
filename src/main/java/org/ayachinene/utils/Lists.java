@@ -2,10 +2,9 @@ package org.ayachinene.utils;
 
 import io.vavr.control.Option;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class Lists {
 
@@ -28,20 +27,31 @@ public final class Lists {
                 : Option.of(values.getLast());
     }
 
-    public static <T> boolean isUnique(List<T> values) {
-        return isUnique(values, Function.identity());
+    public static <T> Option<T> find(List<T> values, Predicate<T> predicate) {
+        return Option.ofOptional(
+            Streams.of(values)
+                .filter(predicate)
+                .findFirst()
+        );
     }
 
-    public static <T, K> boolean isUnique(
-            List<T> values,
-            Function<T, K> key
-    ) {
-        if (values == null) return false;
-
-        var uniqueKeys = new HashSet<K>();
-        for (var value : values) {
-            if (!uniqueKeys.add(key.apply(value))) return false;
-        }
-        return true;
+    public static <T> List<T> distinct(List<T> values) {
+        return Streams.of(values)
+            .distinct()
+            .toList();
     }
+
+    public static <T> List<T> filterNull(List<T> values) {
+        return Streams.of(values)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    public static <T> List<T> uniqueNonNull(List<T> values) {
+        return Streams.of(values)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+    }
+
 }

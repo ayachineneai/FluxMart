@@ -27,7 +27,7 @@ public final class UUID7 implements Serializable {
     }
 
     public static UUID7 fromString(String value, String field) {
-        var normalized = Validates.requiredText(value, field);
+        var normalized = Validates.text(value, field);
         var parsed = UUID7s.fromString(normalized);
         if (parsed.isLeft()) {
             throw new ValidationException(field + " must be a UUIDv7");
