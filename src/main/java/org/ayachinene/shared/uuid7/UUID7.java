@@ -1,6 +1,6 @@
 package org.ayachinene.shared.uuid7;
 
-import org.ayachinene.app.exception.ValidationException;
+import org.ayachinene.shared.validate.ValidationException;
 import org.ayachinene.utils.Validates;
 
 import java.io.Serial;

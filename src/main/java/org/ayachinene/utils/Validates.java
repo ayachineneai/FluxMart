@@ -1,7 +1,7 @@
 package org.ayachinene.utils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ayachinene.app.exception.ValidationException;
+import org.ayachinene.shared.validate.ValidationException;
 
 import java.util.List;
 import java.util.function.Predicate;

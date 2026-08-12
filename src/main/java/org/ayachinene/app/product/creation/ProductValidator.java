@@ -1,13 +1,17 @@
 package org.ayachinene.app.product.creation;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
-import org.ayachinene.utils.Streams;
-import org.ayachinene.utils.Validates;
+import org.ayachinene.shared.uuid7.UUID7;
+import org.ayachinene.shared.validate.AmountValidators;
+import org.ayachinene.shared.validate.ListValidators;
+import org.ayachinene.shared.validate.Validators;
 
-import java.util.List;
+import java.math.BigDecimal;
 
-import static org.ayachinene.utils.Lists.uniqueNonNull;
-import static org.ayachinene.utils.Validates.*;
+import static org.ayachinene.shared.validate.ListValidators.*;
+import static org.ayachinene.shared.validate.StringValidators.text;
+import static org.ayachinene.shared.validate.Validators.notNull;
+import static org.ayachinene.shared.validate.Validators.whenPresent;
 
 public final class ProductValidator {
 
@@ -16,54 +20,56 @@ public final class ProductValidator {
 
     public static CreateProductRequest validate(CreateProductRequest request) {
         notNull(request, "request");
+
         return new CreateProductRequest(
-            text(request.title(), "title", 50),
-            optionalText(request.subtitle(), "subtitle", 50),
-            text(request.description(), "description", 5000),
-            text(request.categoryCode(), "categoryCode", 64),
+            text(50).v(request.title(), "title"),
+            whenPresent(text(50)).v(request.subtitle(), "subtitle"),
+            text(5000).v(request.description(), "description"),
+            text(64).v(request.categoryCode(), "categoryCode"),
             notNull(request.primaryImageFileId(), "primaryImageFileId"),
-            uniqueNonNull(request.galleryImageFileIds()),
-            validateSpecifications(request.specifications()),
-            request.skus()
+            ListValidators.<UUID7>nullAsEmpty()
+                .c(each(Validators::notNull))
+                .c(unique())
+                .v(request.galleryImageFileIds(), "galleryImageFileIds"),
+            ListValidators.<CreateProductRequest.SpecificationRequest>nullAsEmpty()
+                .c(each((specification, field) -> {
+                    notNull(specification, field);
+                    return new CreateProductRequest.SpecificationRequest(
+                        text(50).v(specification.name(), field + ".name"),
+                        each(text(50))
+                            .c(notEmpty())
+                            .c(unique())
+                            .v(specification.values(), field + ".values")
+                    );
+                }))
+                .c(unique(CreateProductRequest.SpecificationRequest::name))
+                .v(request.specifications(), "specifications"),
+            ListValidators.<CreateProductRequest.SkuRequest>nullAsEmpty()
+                .c(each((sku, field) -> {
+                    notNull(sku, field);
+                    return new CreateProductRequest.SkuRequest(
+                        whenPresent(text(64)).v(
+                            sku.merchantSkuCode(),
+                            field + ".merchantSkuCode"
+                        ),
+                        AmountValidators.positive()
+                            .c(AmountValidators.range(
+                                BigDecimal.ZERO,
+                                new BigDecimal("99999999.99")
+                            ))
+                            .c(AmountValidators.maxFractionDigits(2))
+                            .v(
+                                notNull(sku.price(), field + ".price"),
+                                field + ".price"
+                            ),
+                        sku.imageFileId(),
+                        ListValidators.<CreateProductRequest.SelectionRequest>nullAsEmpty()
+                            .v(sku.selections(), field + ".selections")
+                    );
+                }))
+                .c(notEmpty())
+                .v(request.skus(), "skus")
         );
     }
 
-    private static List<CreateProductRequest.SpecificationRequest> validateSpecifications(
-        List<CreateProductRequest.SpecificationRequest> requests
-    ) {
-        var specifications = Streams.withIndex(requests)
-            .map(x -> validateSpecification(x.value(), x.index()))
-            .toList();
-        unique(
-            Streams.of(specifications)
-                .map(CreateProductRequest.SpecificationRequest::name)
-                .toList(),
-            "specification names must not contain duplicates"
-        );
-        return specifications;
-    }
-
-    private static CreateProductRequest.SpecificationRequest validateSpecification(
-        CreateProductRequest.SpecificationRequest request,
-        int index
-    ) {
-        var field = "specifications[" + index + "]";
-        notNull(request, field);
-        var name = text(request.name(), field + ".name", 50);
-        return new CreateProductRequest.SpecificationRequest(
-            name,
-            validateSpecificationValues(request.values(), name)
-        );
-    }
-
-    private static List<String> validateSpecificationValues(
-        List<String> values,
-        String specificationName
-    ) {
-        var field = "specifications[" + specificationName + "].values";
-        var normalized = list(uniqueNonNull(values), field);
-        return Streams.withIndex(normalized)
-            .map(x -> text(x.value(), field + "[" + x.index() + "]", 50))
-            .toList();
-    }
 }
