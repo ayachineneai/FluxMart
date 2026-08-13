@@ -229,6 +229,39 @@ CREATE TABLE IF NOT EXISTS customer_order
     KEY idx_status_payment_expires_at (status, payment_expires_at)
 ) COMMENT = '用户订单';
 
+DROP TABLE IF EXISTS payment;
+CREATE TABLE IF NOT EXISTS payment
+(
+    id                BINARY(16)      COMMENT 'UUIDv7 数据库内部主键',
+
+    payment_code      VARCHAR(24)
+                      CHARACTER SET ascii
+                      COLLATE ascii_bin
+                      COMMENT '系统生成的支付单业务编号，区分大小写',
+    order_id          BINARY(16)      COMMENT '所属订单内部主键',
+    channel           VARCHAR(20)     COMMENT '支付渠道，当前仅支持支付宝-ALIPAY',
+
+    status            VARCHAR(20)     COMMENT '待支付-PENDING、支付成功-SUCCEEDED、已关闭-CLOSED',
+    amount            BIGINT UNSIGNED COMMENT '支付金额，单位为人民币分',
+    provider_trade_no VARCHAR(64)
+                      CHARACTER SET ascii
+                      COLLATE ascii_bin
+                      COMMENT '支付渠道生成的交易编号',
+
+    paid_at           DATETIME(3)     COMMENT '支付成功时间',
+    closed_at         DATETIME(3)     COMMENT '支付关闭时间',
+
+    version           BIGINT UNSIGNED COMMENT '乐观锁版本',
+    created_at        DATETIME(3)     COMMENT '创建时间',
+    updated_at        DATETIME(3)     COMMENT '最后修改时间',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_payment_code (payment_code),
+    UNIQUE KEY uk_order_id (order_id),
+    UNIQUE KEY uk_channel_provider_trade_no (channel, provider_trade_no),
+    KEY idx_status_updated_at (status, updated_at)
+) COMMENT = '支付单';
+
 DROP TABLE IF EXISTS order_item;
 CREATE TABLE IF NOT EXISTS order_item
 (

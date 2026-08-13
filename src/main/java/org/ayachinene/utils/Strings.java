@@ -9,4 +9,9 @@ public final class Strings {
         return Streams.of(characters)
                 .noneMatch(character -> s.indexOf(character) >= 0);
     }
+
+    public static String strip(String s) {
+        return s == null ? null : s.strip();
+    }
+
 }

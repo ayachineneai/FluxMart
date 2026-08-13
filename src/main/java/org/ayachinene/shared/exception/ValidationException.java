@@ -1,4 +1,4 @@
-package org.ayachinene.shared.validate;
+package org.ayachinene.shared.exception;
 
 public class ValidationException extends RuntimeException {
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ayachinene.infra.order.persistence.OrderProductMapper">
+
+    <resultMap id="orderProductRow"
+               type="org.ayachinene.infra.order.persistence.OrderProductRow">
+        <id property="skuId" column="sku_id"/>
+        <result property="skuCode" column="sku_code"/>
+        <result property="skuStatus" column="sku_status"/>
+        <result property="priceAmount" column="price_amount"/>
+        <result property="stockId" column="stock_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productStatus" column="product_status"/>
+        <result property="productTitle" column="product_title"/>
+        <result property="snapshotImageFileId" column="snapshot_image_file_id"/>
+    </resultMap>
+
+    <resultMap id="specificationSelectionRow"
+               type="org.ayachinene.infra.order.persistence.SpecificationSelectionRow">
+        <result property="specificationCode" column="specification_code"/>
+        <result property="specificationName" column="specification_name"/>
+        <result property="specificationValueCode" column="specification_value_code"/>
+        <result property="specificationValue" column="specification_value"/>
+    </resultMap>
+
+    <select id="findBySkuCode" resultMap="orderProductRow">
+        SELECT s.id AS sku_id,
+               s.sku_code,
+               s.status AS sku_status,
+               s.price_amount,
+               stock.id AS stock_id,
+               product.product_code,
+               product.status AS product_status,
+               product.title AS product_title,
+               COALESCE(s.image_file_id, product.primary_image_file_id)
+                   AS snapshot_image_file_id
+        FROM sku s
+        JOIN product ON product.id = s.product_id
+        JOIN stock ON stock.sku_id = s.id
+        WHERE s.sku_code = #{skuCode}
+    </select>
+
+    <select id="findSpecificationSelections"
+            resultMap="specificationSelectionRow">
+        SELECT specification.specification_code,
+               specification.name AS specification_name,
+               specification_value.specification_value_code,
+               specification_value.display_name AS specification_value
+        FROM sku_specification_selection selection
+        JOIN product_specification specification
+          ON specification.id = selection.specification_id
+        JOIN product_specification_value specification_value
+          ON specification_value.id = selection.specification_value_id
+         AND specification_value.specification_id = selection.specification_id
+        WHERE selection.sku_id = #{skuId}
+        ORDER BY specification.sort_order
+    </select>
+
+</mapper>

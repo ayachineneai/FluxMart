@@ -1,8 +1,9 @@
 package org.ayachinene.app.product;
 
 import org.ayachinene.api.product.data.CreateProductRequest;
-import org.ayachinene.app.product.creation.ProductValidator;
+import org.ayachinene.app.product.creation.ProductPreprocessor;
 import org.ayachinene.app.product.creation.ProductPosCreator;
+import org.ayachinene.app.product.creation.validate.ProductValidator;
 import org.ayachinene.app.product.repository.ProductRepository;
 import org.ayachinene.app.service.Tx;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class ProductService {
     }
 
     public void create(CreateProductRequest request) {
-        var validated = ProductValidator.validate(request);
+        var validated = ProductValidator.validate(ProductPreprocessor.preprocess(request));
         var pos = ProductPosCreator.mkPos(validated);
         tx.run(() -> productRepository.insert(pos));
     }

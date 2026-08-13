@@ -22,7 +22,10 @@ import org.ayachinene.utils.Streams;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ProductPosCreator {
 
@@ -117,16 +120,16 @@ public final class ProductPosCreator {
     private static List<ProductSpecificationPos> mkProductSpecifications(
         UUID7 productId,
         LocalDateTime createdAt,
-        List<CreateProductRequest.SpecificationRequest> requests
+        LinkedHashMap<String, List<String>> requests
     ) {
-        return Streams.withIndex(requests)
+        return Streams.withIndex(new ArrayList<>(requests.entrySet()))
             .map(x -> {
                 var specificationId = UUID7s.generate();
                 var specification = new ProductSpecificationPO()
                     .setId(specificationId)
                     .setProductId(productId)
                     .setSpecificationCode(SpecificationCode.generate())
-                    .setName(x.value().name())
+                    .setName(x.value().getKey())
                     .setStatus(SpecificationStatus.ENABLED)
                     .setSortOrder(x.index())
                     .setCreatedAt(createdAt)
@@ -134,7 +137,7 @@ public final class ProductPosCreator {
                 var values = mkProductSpecificationValues(
                     specificationId,
                     createdAt,
-                    x.value().values()
+                    x.value().getValue()
                 );
                 return new ProductSpecificationPos(specification, values);
             })
@@ -215,11 +218,15 @@ public final class ProductPosCreator {
         UUID7 skuId,
         LocalDateTime createdAt,
         List<ProductSpecificationPos> specificationPos,
-        List<CreateProductRequest.SelectionRequest> requests
+        Map<String, String> selections
     ) {
-        return Streams.of(requests)
-            .map(request -> {
-                var idPair = specificationSelectionIdPairs(specificationPos, request);
+        return Streams.of(selections.entrySet())
+            .map(selection -> {
+                var idPair = specificationSelectionIdPairs(
+                    specificationPos,
+                    selection.getKey(),
+                    selection.getValue()
+                );
                 return new SkuSpecificationSelectionPO()
                     .setId(UUID7s.generate())
                     .setSkuId(skuId)
@@ -232,12 +239,13 @@ public final class ProductPosCreator {
 
     private static SpecificationSelectionIdPair specificationSelectionIdPairs(
         List<ProductSpecificationPos> specificationPos,
-        CreateProductRequest.SelectionRequest request
+        String specificationName,
+        String specificationValue
     ) {
         var specification = Lists.find(specificationPos,
-            x -> x.specification().getName().equals(request.specification())).get();
+            x -> x.specification().getName().equals(specificationName)).get();
         var value = Lists.find(specification.values(),
-            x -> x.getDisplayName().equals(request.value())).get();
+            x -> x.getDisplayName().equals(specificationValue)).get();
         return new SpecificationSelectionIdPair(
             specification.specification().getId(),
             value.getId()
