@@ -7,8 +7,10 @@ import org.ayachinene.shared.validate.ListValidators;
 import org.ayachinene.shared.validate.Validators;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import static org.ayachinene.shared.validate.ListValidators.*;
+import static org.ayachinene.shared.validate.ListValidators.each;
+import static org.ayachinene.shared.validate.ListValidators.unique;
 import static org.ayachinene.shared.validate.StringValidators.text;
 import static org.ayachinene.shared.validate.Validators.notNull;
 import static org.ayachinene.shared.validate.Validators.whenPresent;
@@ -20,41 +22,82 @@ public final class ProductValidator {
 
     public static CreateProductRequest validate(CreateProductRequest request) {
         notNull(request, "request");
-
         return new CreateProductRequest(
-            // 校验商品基础字段
             text(50).v(request.title(), "title"),
             whenPresent(text(50)).v(request.subtitle(), "subtitle"),
             text(5000).v(request.description(), "description"),
             text(64).v(request.categoryCode(), "categoryCode"),
             notNull(request.primaryImageFileId(), "primaryImageFileId"),
-            // 校验轮播图 ID 非空且不重复
-            ListValidators.<UUID7>nullAsEmpty().c(each(Validators::notNull)).c(unique()).v(request.galleryImageFileIds(), "galleryImageFileIds"),
-            // 校验规格名称及其可选值
-            ListValidators.<CreateProductRequest.SpecificationRequest>nullAsEmpty()
-                .c(each((specification, field) -> {
-                    notNull(specification, field);
-                    return new CreateProductRequest.SpecificationRequest(
-                        text(50).v(specification.name(), field + ".name"),
-                        each(text(50)).c(notEmpty()).c(unique()).v(specification.values(), field + ".values")
-                    );
-                })).c(unique(CreateProductRequest.SpecificationRequest::name))
-                .v(request.specifications(), "specifications"),
-            // 校验 SKU 基础字段和价格，选择项仅规范化为空列表
-            ListValidators.<CreateProductRequest.SkuRequest>nullAsEmpty()
-                .c(each((sku, field) -> {
-                    notNull(sku, field);
-                    return new CreateProductRequest.SkuRequest(
-                        whenPresent(text(64)).v(sku.merchantSkuCode(), field + ".merchantSkuCode"),
-                        AmountValidators.positive().c(AmountValidators.range(BigDecimal.ZERO, new BigDecimal("99999999.99")))
-                            .c(AmountValidators.maxFractionDigits(2))
-                            .v(notNull(sku.price(), field + ".price"), field + ".price"),
-                        sku.imageFileId(),
-                        ListValidators.<CreateProductRequest.SelectionRequest>nullAsEmpty().v(sku.selections(), field + ".selections")
-                    );
-                })).c(notEmpty())
-                .v(request.skus(), "skus")
+            galleryImageFileIds(request.galleryImageFileIds()),
+            specifications(request.specifications()),
+            skus(request.skus())
         );
     }
 
+    private static List<UUID7> galleryImageFileIds(List<UUID7> values) {
+        return ListValidators.<UUID7>nullAsEmpty()
+            .c(unique())
+            .c(each(Validators::notNull))
+            .v(values, "galleryImageFileIds");
+    }
+
+    private static List<CreateProductRequest.SpecificationRequest> specifications(
+        List<CreateProductRequest.SpecificationRequest> values
+    ) {
+        return ListValidators.<CreateProductRequest.SpecificationRequest>nullAsEmpty()
+            .c(each(ProductValidator::specification))
+            .c(unique(CreateProductRequest.SpecificationRequest::name))
+            .v(values, "specifications");
+    }
+
+    private static CreateProductRequest.SpecificationRequest specification(
+        CreateProductRequest.SpecificationRequest specification,
+        String field
+    ) {
+        notNull(specification, field);
+        return new CreateProductRequest.SpecificationRequest(
+            text(50).v(specification.name(), field + ".name"),
+            ListValidators.<String>notEmpty()
+                .c(each(text(50)))
+                .c(unique())
+                .v(specification.values(), field + ".values")
+        );
+    }
+
+    private static List<CreateProductRequest.SkuRequest> skus(
+        List<CreateProductRequest.SkuRequest> values
+    ) {
+        return ListValidators.<CreateProductRequest.SkuRequest>notEmpty()
+            .c(each(ProductValidator::sku))
+            .v(values, "skus");
+    }
+
+    private static CreateProductRequest.SkuRequest sku(
+        CreateProductRequest.SkuRequest sku,
+        String field
+    ) {
+        notNull(sku, field);
+        return new CreateProductRequest.SkuRequest(
+            whenPresent(text(64)).v(sku.merchantSkuCode(), field + ".merchantSkuCode"),
+            AmountValidators.positive()
+                .c(AmountValidators.range(BigDecimal.ZERO, new BigDecimal("99999999.99")))
+                .c(AmountValidators.maxFractionDigits(2))
+                .v(notNull(sku.price(), field + ".price"), field + ".price"),
+            sku.imageFileId(),
+            ListValidators.<CreateProductRequest.SelectionRequest>nullAsEmpty()
+                .c(each(ProductValidator::selection))
+                .v(sku.selections(), field + ".selections")
+        );
+    }
+
+    private static CreateProductRequest.SelectionRequest selection(
+        CreateProductRequest.SelectionRequest selection,
+        String field
+    ) {
+        notNull(selection, field);
+        return new CreateProductRequest.SelectionRequest(
+            text(50).v(selection.specification(), field + ".specification"),
+            text(50).v(selection.value(), field + ".value")
+        );
+    }
 }

@@ -29,16 +29,11 @@ public final class AmountValidators {
     ) {
         return Validators.require(
             value -> BigDecimals.between(value, first, second),
-            field -> field + " must be between "
-                + first.min(second).toPlainString()
-                + " and " + first.max(second).toPlainString()
-        );
+            field -> field + " must be between " + first.min(second).toPlainString() + " and " + first.max(second).toPlainString());
     }
 
     public static Validator<BigDecimal> maxFractionDigits(int maximum) {
         return Validators.require(value -> !BigDecimals.hasMoreFractionDigitsThan(value, maximum),
-            field -> field + " must have at most "
-                + maximum + " fraction digits"
-        );
+            field -> field + " must have at most " + maximum + " fraction digits");
     }
 }
