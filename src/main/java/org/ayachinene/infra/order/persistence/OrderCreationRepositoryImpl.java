@@ -2,6 +2,8 @@ package org.ayachinene.infra.order.persistence;
 
 import io.vavr.control.Option;
 import org.ayachinene.app.order.OrderCreationRepository;
+import org.ayachinene.app.order.creation.CreateOrderResult;
+import org.ayachinene.app.order.creation.ExistingOrder;
 import org.ayachinene.app.order.creation.OrderPos;
 import org.ayachinene.app.order.creation.OrderQuantity;
 import org.ayachinene.app.order.creation.ProductFacts;
@@ -21,11 +23,11 @@ public class OrderCreationRepositoryImpl implements OrderCreationRepository {
     }
 
     @Override
-    public Option<OrderQuantity> findOrderQuantity(
+    public Option<ExistingOrder> findExistingOrder(
         UUID7 userId,
         String requestKey
     ) {
-        return Option.of(mapper.findOrderQuantity(userId, requestKey));
+        return Option.of(mapper.findExistingOrder(userId, requestKey));
     }
 
     @Override
@@ -42,12 +44,11 @@ public class OrderCreationRepositoryImpl implements OrderCreationRepository {
     }
 
     @Override
-    public void create(OrderPos orderPos) {
+    public CreateOrderResult create(OrderPos orderPos) {
         try {
             mapper.insertCustomerOrder(orderPos.customerOrder());
         } catch (DuplicateKeyException exception) {
-            handleDuplicateOrder(orderPos, exception);
-            return;
+            return handleDuplicateOrder(orderPos, exception);
         }
 
         mapper.insertOrderItem(orderPos.orderItem());
@@ -60,14 +61,15 @@ public class OrderCreationRepositoryImpl implements OrderCreationRepository {
             throw new ValidationException("insufficient stock");
         }
         mapper.insertStockReservation(orderPos.stockReservation());
+        return resultOf(orderPos);
     }
 
-    private void handleDuplicateOrder(
+    private CreateOrderResult handleDuplicateOrder(
         OrderPos orderPos,
         DuplicateKeyException exception
     ) {
         var order = orderPos.customerOrder();
-        var existing = findOrderQuantityAfterConflict(
+        var existing = findExistingOrderAfterConflict(
             order.userId(),
             order.requestKey()
         );
@@ -77,19 +79,31 @@ public class OrderCreationRepositoryImpl implements OrderCreationRepository {
 
         var item = orderPos.orderItem();
         if (!Orders.isIdempotentRetry(
-            existing,
+            existing.get().quantity(),
             new OrderQuantity(item.skuCode(), item.quantity())
         )) {
             throw new ValidationException(
                 "requestKey has been used with different order parameters"
             );
         }
+        return existing.get().result();
     }
 
-    private Option<OrderQuantity> findOrderQuantityAfterConflict(
+    private Option<ExistingOrder> findExistingOrderAfterConflict(
         UUID7 userId,
         String requestKey
     ) {
-        return Option.of(mapper.findOrderQuantityForUpdate(userId, requestKey));
+        return Option.of(mapper.findExistingOrderForUpdate(userId, requestKey));
+    }
+
+    private static CreateOrderResult resultOf(OrderPos orderPos) {
+        var order = orderPos.customerOrder();
+        return new CreateOrderResult(
+            order.id(),
+            order.orderCode(),
+            order.status(),
+            order.totalAmount(),
+            order.paymentExpiresAt()
+        );
     }
 }

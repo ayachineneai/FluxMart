@@ -1,7 +1,7 @@
 package org.ayachinene.infra.order.persistence;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.ayachinene.app.order.creation.OrderQuantity;
+import org.ayachinene.app.order.creation.ExistingOrder;
 import org.ayachinene.app.order.creation.ProductBaseInfo;
 import org.ayachinene.app.order.creation.SpecificationSelection;
 import org.ayachinene.shared.uuid7.UUID7;
@@ -12,12 +12,12 @@ import java.util.List;
 @Mapper
 public interface OrderCreationMapper {
 
-    OrderQuantity findOrderQuantity(
+    ExistingOrder findExistingOrder(
         UUID7 userId,
         String requestKey
     );
 
-    OrderQuantity findOrderQuantityForUpdate(
+    ExistingOrder findExistingOrderForUpdate(
         UUID7 userId,
         String requestKey
     );

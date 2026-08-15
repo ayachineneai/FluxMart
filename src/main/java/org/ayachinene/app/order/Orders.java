@@ -1,6 +1,5 @@
 package org.ayachinene.app.order;
 
-import io.vavr.control.Option;
 import org.ayachinene.app.code.BusinessCodes;
 import org.ayachinene.app.order.creation.CreateOrderRequest;
 import org.ayachinene.app.order.creation.OrderCreationInfo;
@@ -50,12 +49,10 @@ public final class Orders {
     }
 
     public static boolean isIdempotentRetry(
-        Option<OrderQuantity> existingOrderQuantity,
+        OrderQuantity existingOrderQuantity,
         OrderQuantity requestedOrderQuantity
     ) {
-        return existingOrderQuantity.exists(x ->
-            Objects.equals(x, requestedOrderQuantity)
-        );
+        return Objects.equals(existingOrderQuantity, requestedOrderQuantity);
     }
 
     public static void checkOrderable(

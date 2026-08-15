@@ -1,6 +1,5 @@
 package org.ayachinene.app.order;
 
-import io.vavr.control.Option;
 import org.ayachinene.app.order.creation.CreateOrderRequest;
 import org.ayachinene.app.order.creation.OrderQuantity;
 import org.ayachinene.app.order.creation.ProductBaseInfo;
@@ -60,11 +59,7 @@ class OrdersTest {
         var quantity = new OrderQuantity(skuCode(), 2);
 
         assertTrue(Orders.isIdempotentRetry(
-            Option.of(quantity),
-            quantity
-        ));
-        assertFalse(Orders.isIdempotentRetry(
-            Option.none(),
+            quantity,
             quantity
         ));
     }
@@ -72,7 +67,7 @@ class OrdersTest {
     @Test
     void doesNotIdentifyDifferentOrderQuantityAsIdempotentRetry() {
         assertFalse(Orders.isIdempotentRetry(
-            Option.of(new OrderQuantity(skuCode(), 1)),
+            new OrderQuantity(skuCode(), 1),
             new OrderQuantity(skuCode(), 2)
         ));
     }

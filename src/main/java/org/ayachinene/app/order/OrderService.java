@@ -1,6 +1,7 @@
 package org.ayachinene.app.order;
 
 import org.ayachinene.app.order.creation.CreateOrderRequest;
+import org.ayachinene.app.order.creation.CreateOrderResult;
 import org.ayachinene.app.order.creation.OrderQuantity;
 import org.ayachinene.app.service.Tx;
 import org.ayachinene.shared.exception.ValidationException;
@@ -24,23 +25,24 @@ public class OrderService {
         this.objectMapper = objectMapper;
     }
 
-    public void createOrder(CreateOrderRequest request) {
+    public CreateOrderResult createOrder(CreateOrderRequest request) {
         Orders.validate(request);
-        tx.run(() -> doCreateOrder(request));
+        return tx.run(() -> doCreateOrder(request));
     }
 
-    private void doCreateOrder(CreateOrderRequest request) {
-        var existingOrderQuantity = orderCreationRepository.findOrderQuantity(
+    private CreateOrderResult doCreateOrder(CreateOrderRequest request) {
+        var existingOrder = orderCreationRepository.findExistingOrder(
             request.userId(),
             request.requestKey()
         );
 
-        if (existingOrderQuantity.isDefined()) {
+        if (existingOrder.isDefined()) {
+            var existing = existingOrder.get();
             if (!Orders.isIdempotentRetry(
-                existingOrderQuantity,
+                existing.quantity(),
                 new OrderQuantity(request.skuCode(), request.quantity())
             )) throw new ValidationException("requestKey has been used with different order parameters");
-            return;
+            return existing.result();
         }
 
         var productFacts = orderCreationRepository
@@ -56,7 +58,7 @@ public class OrderService {
             Orders.prepareOrderCreationInfo()
         );
 
-        orderCreationRepository.create(orderPos);
+        return orderCreationRepository.create(orderPos);
     }
 
 }

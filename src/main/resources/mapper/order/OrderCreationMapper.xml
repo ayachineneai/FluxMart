@@ -5,15 +5,37 @@
 <mapper namespace="org.ayachinene.infra.order.persistence.OrderCreationMapper">
 
     <resultMap id="orderQuantity"
-               type="org.ayachinene.app.order.OrderService$OrderQuantity">
+               type="org.ayachinene.app.order.creation.OrderQuantity">
         <constructor>
             <arg column="sku_code" javaType="java.lang.String"/>
             <arg column="quantity" javaType="_int"/>
         </constructor>
     </resultMap>
 
+    <resultMap id="createOrderResult"
+               type="org.ayachinene.app.order.creation.CreateOrderResult">
+        <constructor>
+            <arg column="order_id"
+                 javaType="org.ayachinene.shared.uuid7.UUID7"/>
+            <arg column="order_code" javaType="java.lang.String"/>
+            <arg column="order_status"
+                 javaType="org.ayachinene.app.order.domain.OrderStatus"/>
+            <arg column="total_amount" javaType="_long"/>
+            <arg column="payment_expires_at"
+                 javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="existingOrder"
+               type="org.ayachinene.app.order.creation.ExistingOrder">
+        <constructor>
+            <arg resultMap="orderQuantity"/>
+            <arg resultMap="createOrderResult"/>
+        </constructor>
+    </resultMap>
+
     <resultMap id="productBaseInfo"
-               type="org.ayachinene.app.order.OrderService$ProductBaseInfo">
+               type="org.ayachinene.app.order.creation.ProductBaseInfo">
         <constructor>
             <arg column="sku_id"
                  javaType="org.ayachinene.shared.uuid7.UUID7"/>
@@ -34,7 +56,7 @@
     </resultMap>
 
     <resultMap id="specificationSelection"
-               type="org.ayachinene.app.order.OrderService$SpecificationSelection">
+               type="org.ayachinene.app.order.creation.SpecificationSelection">
         <constructor>
             <arg column="specification_code" javaType="java.lang.String"/>
             <arg column="specification_name" javaType="java.lang.String"/>
@@ -43,10 +65,15 @@
         </constructor>
     </resultMap>
 
-    <select id="findOrderQuantity"
-            resultMap="orderQuantity">
+    <select id="findExistingOrder"
+            resultMap="existingOrder">
         SELECT item.sku_code,
-               item.quantity
+               item.quantity,
+               customer_order.id AS order_id,
+               customer_order.order_code,
+               customer_order.status AS order_status,
+               customer_order.total_amount,
+               customer_order.payment_expires_at
         FROM customer_order customer_order
         JOIN order_item item ON item.order_id = customer_order.id
         WHERE customer_order.user_id = #{userId}
@@ -55,10 +82,15 @@
         LIMIT 1
     </select>
 
-    <select id="findOrderQuantityForUpdate"
-            resultMap="orderQuantity">
+    <select id="findExistingOrderForUpdate"
+            resultMap="existingOrder">
         SELECT item.sku_code,
-               item.quantity
+               item.quantity,
+               customer_order.id AS order_id,
+               customer_order.order_code,
+               customer_order.status AS order_status,
+               customer_order.total_amount,
+               customer_order.payment_expires_at
         FROM customer_order customer_order
         JOIN order_item item ON item.order_id = customer_order.id
         WHERE customer_order.user_id = #{userId}
