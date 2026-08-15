@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS order_item
                            COMMENT '下单时的 SKU 业务编号',
 
     product_title          VARCHAR(50)     COMMENT '下单时的商品标题快照',
-    specification_snapshot JSON            COMMENT '下单时有序的规格身份与展示文本快照',
+    specification_snapshot TEXT            COMMENT '下单时有序的规格身份与展示文本快照 JSON 文本',
     image_file_id          BINARY(16)      COMMENT '下单时采用的商品或 SKU 图片文件 ID',
 
     unit_price_amount      BIGINT UNSIGNED COMMENT '下单时的 SKU 单价，单位为人民币分',

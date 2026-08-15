@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ayachinene.infra.order.persistence.OrderCreationMapper">
+
+    <resultMap id="orderQuantity"
+               type="org.ayachinene.app.order.OrderService$OrderQuantity">
+        <constructor>
+            <arg column="sku_code" javaType="java.lang.String"/>
+            <arg column="quantity" javaType="_int"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="productBaseInfo"
+               type="org.ayachinene.app.order.OrderService$ProductBaseInfo">
+        <constructor>
+            <arg column="sku_id"
+                 javaType="org.ayachinene.shared.uuid7.UUID7"/>
+            <arg column="sku_code" javaType="java.lang.String"/>
+            <arg column="sku_status"
+                 javaType="org.ayachinene.app.product.domain.sku.SkuStatus"/>
+            <arg column="unit_price_amount" javaType="_long"/>
+            <arg column="stock_id"
+                 javaType="org.ayachinene.shared.uuid7.UUID7"/>
+            <arg column="available_quantity" javaType="_long"/>
+            <arg column="product_code" javaType="java.lang.String"/>
+            <arg column="product_status"
+                 javaType="org.ayachinene.app.product.domain.ProductStatus"/>
+            <arg column="product_title" javaType="java.lang.String"/>
+            <arg column="snapshot_image_file_id"
+                 javaType="org.ayachinene.shared.uuid7.UUID7"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="specificationSelection"
+               type="org.ayachinene.app.order.OrderService$SpecificationSelection">
+        <constructor>
+            <arg column="specification_code" javaType="java.lang.String"/>
+            <arg column="specification_name" javaType="java.lang.String"/>
+            <arg column="specification_value_code" javaType="java.lang.String"/>
+            <arg column="specification_value" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findOrderQuantity"
+            resultMap="orderQuantity">
+        SELECT item.sku_code,
+               item.quantity
+        FROM customer_order customer_order
+        JOIN order_item item ON item.order_id = customer_order.id
+        WHERE customer_order.user_id = #{userId}
+          AND customer_order.request_key = #{requestKey}
+        ORDER BY item.sort_order
+        LIMIT 1
+    </select>
+
+    <select id="findOrderQuantityForUpdate"
+            resultMap="orderQuantity">
+        SELECT item.sku_code,
+               item.quantity
+        FROM customer_order customer_order
+        JOIN order_item item ON item.order_id = customer_order.id
+        WHERE customer_order.user_id = #{userId}
+          AND customer_order.request_key = #{requestKey}
+        ORDER BY item.sort_order
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <select id="findProductBaseInfo"
+            resultMap="productBaseInfo">
+        SELECT sku.id AS sku_id,
+               sku.sku_code,
+               sku.status AS sku_status,
+               sku.price_amount AS unit_price_amount,
+               stock.id AS stock_id,
+               stock.available_quantity,
+               product.product_code,
+               product.status AS product_status,
+               product.title AS product_title,
+               COALESCE(sku.image_file_id, product.primary_image_file_id)
+                   AS snapshot_image_file_id
+        FROM sku
+        JOIN product ON product.id = sku.product_id
+        JOIN stock ON stock.sku_id = sku.id
+        WHERE sku.sku_code = #{skuCode}
+    </select>
+
+    <select id="findSpecificationSelections"
+            resultMap="specificationSelection">
+        SELECT specification.specification_code,
+               specification.name AS specification_name,
+               specification_value.specification_value_code,
+               specification_value.display_name AS specification_value
+        FROM sku_specification_selection selection
+        JOIN product_specification specification
+          ON specification.id = selection.specification_id
+        JOIN product_specification_value specification_value
+          ON specification_value.id = selection.specification_value_id
+         AND specification_value.specification_id = selection.specification_id
+        WHERE selection.sku_id = #{skuId}
+        ORDER BY specification.sort_order
+    </select>
+
+    <insert id="insertCustomerOrder">
+        INSERT INTO customer_order (
+            id,
+            order_code,
+            user_id,
+            request_key,
+            status,
+            total_amount,
+            payment_expires_at,
+            version,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{id},
+            #{orderCode},
+            #{userId},
+            #{requestKey},
+            #{status},
+            #{totalAmount},
+            #{paymentExpiresAt},
+            #{version},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <insert id="insertOrderItem">
+        INSERT INTO order_item (
+            id,
+            order_id,
+            product_code,
+            sku_code,
+            product_title,
+            specification_snapshot,
+            image_file_id,
+            unit_price_amount,
+            quantity,
+            total_amount,
+            sort_order,
+            created_at
+        ) VALUES (
+            #{id},
+            #{orderId},
+            #{productCode},
+            #{skuCode},
+            #{productTitle},
+            #{specificationSnapshot},
+            #{imageFileId},
+            #{unitPriceAmount},
+            #{quantity},
+            #{totalAmount},
+            #{sortOrder},
+            #{createdAt}
+        )
+    </insert>
+
+    <update id="reserveStock">
+        UPDATE stock
+        SET available_quantity = available_quantity - #{quantity},
+            reserved_quantity = reserved_quantity + #{quantity},
+            version = version + 1,
+            updated_at = #{updatedAt}
+        WHERE id = #{stockId}
+          AND available_quantity >= #{quantity}
+    </update>
+
+    <insert id="insertStockReservation">
+        INSERT INTO stock_reservation (
+            id,
+            order_id,
+            order_item_id,
+            sku_id,
+            quantity,
+            status,
+            expires_at,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{id},
+            #{orderId},
+            #{orderItemId},
+            #{skuId},
+            #{quantity},
+            #{status},
+            #{expiresAt},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+</mapper>

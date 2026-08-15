@@ -7,6 +7,10 @@ public record SkuCode(String value) {
     private static final String PREFIX = "SKU_";
 
     public SkuCode {
+        validate(value);
+    }
+
+    public static void validate(String value) {
         if (value == null || !value.startsWith(PREFIX)) {
             throw new IllegalArgumentException("skuCode must start with " + PREFIX);
         }
